@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/engine/run/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/telegram/webhook/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/ai/**": {
+      "maxDuration": 60
+    }
+  }
+}

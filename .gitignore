@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# separate ecs backend repository
+/ecs
+*.zip
+
+# documentation and sql scripts (not for github)
+AGENTS.md
+CLAUDE.md
+claude.md
+/sql
+
+
