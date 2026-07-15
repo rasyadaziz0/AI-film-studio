@@ -1,5 +1,6 @@
 import { Info, Loader2, CheckCircle2, Undo2, Redo2 } from "lucide-react";
 import { useCanvasShortcuts } from "../hooks/useCanvasShortcuts";
+import { useStudioStore } from "@/store/useStudioStore";
 
 interface TopControlsProps {
   isSaving: boolean;
@@ -8,6 +9,7 @@ interface TopControlsProps {
 
 export default function TopControls({ isSaving, setIsInfoModalOpen }: TopControlsProps) {
   const { canUndo, canRedo, undo, redo } = useCanvasShortcuts();
+  const { capabilities } = useStudioStore();
 
   return (
     <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
@@ -28,33 +30,35 @@ export default function TopControls({ isSaving, setIsInfoModalOpen }: TopControl
       </div>
 
       {/* Undo / Redo */}
-      <div className="flex h-10 items-center rounded-xl border border-[#444444] bg-[#2c2c2c] shadow-lg overflow-hidden ml-2">
-        <button
-          onClick={() => undo()}
-          disabled={!canUndo}
-          className={`flex items-center justify-center h-full px-3 transition-colors ${
-            canUndo
-              ? "text-[#e0e0e0] hover:bg-[#383838] hover:text-white"
-              : "text-[#555555] cursor-not-allowed"
-          }`}
-          title="Undo (Ctrl+Z)"
-        >
-          <Undo2 size={16} />
-        </button>
-        <div className="w-px h-6 bg-[#444444]"></div>
-        <button
-          onClick={() => redo()}
-          disabled={!canRedo}
-          className={`flex items-center justify-center h-full px-3 transition-colors ${
-            canRedo
-              ? "text-[#e0e0e0] hover:bg-[#383838] hover:text-white"
-              : "text-[#555555] cursor-not-allowed"
-          }`}
-          title="Redo (Ctrl+Y)"
-        >
-          <Redo2 size={16} />
-        </button>
-      </div>
+      {capabilities.canEditCanvas && (
+        <div className="flex h-10 items-center rounded-xl border border-[#444444] bg-[#2c2c2c] shadow-lg overflow-hidden ml-2">
+          <button
+            onClick={() => undo()}
+            disabled={!canUndo}
+            className={`flex items-center justify-center h-full px-3 transition-colors ${
+              canUndo
+                ? "text-[#e0e0e0] hover:bg-[#383838] hover:text-white"
+                : "text-[#555555] cursor-not-allowed"
+            }`}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 size={16} />
+          </button>
+          <div className="w-px h-6 bg-[#444444]"></div>
+          <button
+            onClick={() => redo()}
+            disabled={!canRedo}
+            className={`flex items-center justify-center h-full px-3 transition-colors ${
+              canRedo
+                ? "text-[#e0e0e0] hover:bg-[#383838] hover:text-white"
+                : "text-[#555555] cursor-not-allowed"
+            }`}
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo2 size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

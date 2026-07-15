@@ -16,6 +16,16 @@ export const useStudioStore = create<StudioState>((set, get) => {
     toolMode: "pointer",
     studios: [],
     activeStudioId: null,
+    capabilities: {
+      canView: true,
+      canEditCanvas: true,
+      canRun: true,
+      canManageSharing: true,
+      canDelete: true,
+    },
+    role: 'owner',
+    accessSource: 'owner',
+    setAccessCapabilities: (role, accessSource, capabilities) => set({ role, accessSource, capabilities }),
     history: { past: [], future: [] },
 
     // --- History Methods ---
@@ -67,6 +77,10 @@ export const useStudioStore = create<StudioState>((set, get) => {
 
     // --- Pipeline Engine Proxies ---
     runNode: async (nodeId) => {
+      if (!get().capabilities.canRun) {
+        toast.error("Akses Ditolak", "Mode View-Only tidak mengizinkan eksekusi agen AI.");
+        return;
+      }
       const { activeStudioId, saveStudio, nodes } = get();
       if (!activeStudioId || !nodeId) return;
 
@@ -100,6 +114,10 @@ export const useStudioStore = create<StudioState>((set, get) => {
       }
     },
     runPipeline: async () => {
+      if (!get().capabilities.canRun) {
+        toast.error("Akses Ditolak", "Mode View-Only tidak mengizinkan eksekusi pipeline AI.");
+        return;
+      }
       const { activeStudioId, saveStudio } = get();
       if (!activeStudioId) return;
 

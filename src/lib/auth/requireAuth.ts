@@ -62,10 +62,7 @@ export function checkKillSwitch(): void {
   }
 }
 
-/**
- * Verifies that the authenticated user owns the given studio.
- * Uses the user's own Supabase client (RLS active) + explicit user_id check.
- */
+
 export async function verifyStudioOwnership(
   supabase: SupabaseClient,
   studioId: string,
@@ -83,4 +80,138 @@ export async function verifyStudioOwnership(
   }
 
   return studio;
+}
+
+export interface StudioCapabilities {
+  canView: boolean;
+  canEditCanvas: boolean;
+  canRun: boolean;
+  canManageSharing: boolean;
+  canDelete: boolean;
+}
+
+export interface StudioAccessResult {
+  role: 'owner' | 'editor' | 'viewer';
+  accessSource: 'owner' | 'collaborator' | 'shared_link';
+  capabilities: StudioCapabilities;
+  studio: {
+    id: string;
+    name?: string;
+    video_duration?: number;
+    niche?: string | null;
+    sharing_visibility?: string;
+    share_token?: string;
+  };
+}
+
+/**
+ * Centralized Access Resolver with Deterministic Precedence:
+ * owner > editor collaborator > viewer collaborator > shared_link viewer
+ */
+export async function resolveStudioAccess(
+  supabase: SupabaseClient,
+  studioId: string,
+  userId: string,
+  userEmail?: string
+): Promise<StudioAccessResult> {
+  // 1. Fetch basic studio metadata (using service role or current client)
+  const serviceSupabase = getServiceSupabase();
+  const { data: studio, error: studioErr } = await serviceSupabase
+    .from("studios")
+    .select("id, user_id, name, video_duration, niche, sharing_visibility, share_token")
+    .eq("id", studioId)
+    .single();
+
+  if (studioErr || !studio) {
+    throw new AuthError("Studio not found or access denied", 403);
+  }
+
+  // 1. Precedence Level 1: Owner
+  if (studio.user_id === userId) {
+    return {
+      role: 'owner',
+      accessSource: 'owner',
+      capabilities: {
+        canView: true,
+        canEditCanvas: true,
+        canRun: true,
+        canManageSharing: true,
+        canDelete: true,
+      },
+      studio,
+    };
+  }
+
+  // 2. Precedence Level 2 & 3: Permanent Invited Collaborator (Editor or Viewer)
+  const collabQuery = serviceSupabase
+    .from("studio_collaborators")
+    .select("role")
+    .eq("studio_id", studioId);
+
+  if (userEmail) {
+    collabQuery.or(`user_id.eq.${userId},user_email.eq.${userEmail}`);
+  } else {
+    collabQuery.eq("user_id", userId);
+  }
+
+  const { data: collabs } = await collabQuery;
+  if (collabs && collabs.length > 0) {
+    // If user has both editor and viewer rows somehow, editor wins (highest role wins)
+    const isEditor = collabs.some((c) => c.role === 'editor');
+    if (isEditor) {
+      return {
+        role: 'editor',
+        accessSource: 'collaborator',
+        capabilities: {
+          canView: true,
+          canEditCanvas: true,
+          canRun: true,
+          canManageSharing: false,
+          canDelete: false,
+        },
+        studio,
+      };
+    } else {
+      return {
+        role: 'viewer',
+        accessSource: 'collaborator',
+        capabilities: {
+          canView: true,
+          canEditCanvas: false,
+          canRun: false,
+          canManageSharing: false,
+          canDelete: false,
+        },
+        studio,
+      };
+    }
+  }
+
+  // 3. Precedence Level 4: Ephemeral Shared Link Viewer (if snapshot matches and link_view active)
+  if (studio.sharing_visibility === 'link_view' && studio.share_token) {
+    const { data: grant } = await serviceSupabase
+      .from("studio_shared_access_grants")
+      .select("granted_token_snapshot")
+      .eq("studio_id", studioId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (grant && grant.granted_token_snapshot === studio.share_token) {
+      return {
+        role: 'viewer',
+        accessSource: 'shared_link',
+        capabilities: {
+          canView: true,
+          canEditCanvas: false,
+          canRun: false,
+          canManageSharing: false,
+          canDelete: false,
+        },
+        studio,
+      };
+    }
+  }
+
+  // 4. Access Denied
+  throw new AuthError("You do not have permission to access this studio", 403);
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Film, Loader2 } from "lucide-react";
 
 export default function AuthForm() {
@@ -12,6 +12,8 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +33,9 @@ export default function AuthForm() {
           password,
         });
         if (error) throw error;
-        // Optional: show a message if email confirmation is required by your Supabase project settings
       }
       
-      router.push("/dashboard");
+      router.push(redirectUrl);
       router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed";
@@ -51,7 +52,7 @@ export default function AuthForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}${redirectUrl}`,
         },
       });
       if (error) throw error;

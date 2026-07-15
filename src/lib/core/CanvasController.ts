@@ -10,6 +10,7 @@ export class CanvasController {
   ) { }
 
   public onNodesChange(changes: NodeChange[]) {
+    if (!this.get().capabilities.canEditCanvas) return;
     const hasRemoval = changes.some((c) => c.type === "remove");
     if (hasRemoval) this.get().saveHistory();
 
@@ -19,6 +20,7 @@ export class CanvasController {
   }
 
   public onEdgesChange(changes: EdgeChange[]) {
+    if (!this.get().capabilities.canEditCanvas) return;
     const hasRemoval = changes.some((c) => c.type === "remove");
     if (hasRemoval) this.get().saveHistory();
 
@@ -28,6 +30,7 @@ export class CanvasController {
   }
 
   public onConnect(connection: Connection) {
+    if (!this.get().capabilities.canEditCanvas) return;
     this.get().saveHistory();
     const newEdge: Edge = {
       ...connection,
@@ -42,6 +45,7 @@ export class CanvasController {
   }
 
   public addNode(type: AgentType, position: { x: number; y: number }) {
+    if (!this.get().capabilities.canEditCanvas) return;
     this.get().saveHistory();
     const newNode: Node = {
       id: uuidv4(),
@@ -54,6 +58,7 @@ export class CanvasController {
   }
 
   public updateNodeData(nodeId: string, data: Record<string, unknown>) {
+    if (!this.get().capabilities.canEditCanvas) return;
     // Note: If we save history on every keystroke of the label textarea, it bloats history.
     // For now, we skip saving history on text typing to avoid input lag and history bloat.
     this.set({
@@ -73,6 +78,7 @@ export class CanvasController {
   }
 
   public changeNodeType(nodeId: string, newType: AgentType) {
+    if (!this.get().capabilities.canEditCanvas) return;
     this.get().saveHistory();
     this.set({
       nodes: this.get().nodes.map((node) =>
@@ -94,6 +100,7 @@ export class CanvasController {
   }
 
   public deleteNode(nodeId: string) {
+    if (!this.get().capabilities.canEditCanvas) return;
     this.get().saveHistory();
     this.set({
       nodes: this.get().nodes.filter((node) => node.id !== nodeId),
@@ -101,3 +108,4 @@ export class CanvasController {
     });
   }
 }
+

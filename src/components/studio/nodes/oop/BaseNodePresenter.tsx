@@ -186,14 +186,17 @@ export abstract class BaseNodePresenter {
           if (!this.data.output_url) return null;
 
           const urlWithoutQuery = this.data.output_url.split('?')[0].trim();
-          const isVideoOrAudio = urlWithoutQuery.match(/\.(mp4|webm|mp3|ogg|mov)$/i);
-          const isImage = urlWithoutQuery.match(/\.(png|jpe?g|gif|webp)$/i) || this.data.type === "actor" || this.data.output_url.includes("image");
+          const isAudio = urlWithoutQuery.match(/\.(mp3|ogg|wav|aac|flac)$/i) || this.data.type === "tts" || this.data.output_url.includes("audio");
+          const isVideo = (urlWithoutQuery.match(/\.(mp4|webm|mov)$/i) || this.data.type === "video" || this.data.output_url.includes("video")) && !isAudio;
+          const isImage = (urlWithoutQuery.match(/\.(png|jpe?g|gif|webp)$/i) || this.data.type === "actor" || this.data.output_url.includes("image")) && !isVideo && !isAudio;
 
           const titleParam = encodeURIComponent(this.getMediaTitle());
           const urlParam = encodeURIComponent(this.data.output_url);
 
           let playerHref = this.data.output_url; // Default fallback
-          if (isVideoOrAudio) {
+          if (isAudio) {
+            playerHref = `/audio?url=${urlParam}&title=${titleParam}`;
+          } else if (isVideo) {
             playerHref = `/player?url=${urlParam}&title=${titleParam}`;
           } else if (isImage) {
             playerHref = `/viewer?url=${urlParam}&title=${titleParam}`;
@@ -232,10 +235,14 @@ export abstract class BaseNodePresenter {
                   e.stopPropagation();
                   window.open(playerHref, "_blank");
                 }}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-[4px] bg-gradient-to-r from-sky-500/20 to-purple-500/20 hover:from-sky-500/30 hover:to-purple-500/30 border border-sky-500/30 text-sky-300 text-[10px] font-medium transition-all shadow-sm cursor-pointer"
+                className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-[4px] border font-medium transition-all shadow-sm cursor-pointer text-[10px] ${
+                  isAudio
+                    ? "bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 border-amber-500/30 text-amber-300"
+                    : "bg-gradient-to-r from-sky-500/20 to-purple-500/20 hover:from-sky-500/30 hover:to-purple-500/30 border-sky-500/30 text-sky-300"
+                }`}
               >
                 <ExternalLink size={11} />
-                {isVideoOrAudio ? "🎬 Putar di Cinema Player" : isImage ? "🖼️ Buka Gambar Fullscreen" : "Buka File Output"}
+                {isAudio ? "🎧 Putar di Audio Studio" : isVideo ? "🎬 Putar di Cinema Player" : isImage ? "🖼️ Buka Gambar Fullscreen" : "Buka File Output"}
               </button>
             </div>
           );

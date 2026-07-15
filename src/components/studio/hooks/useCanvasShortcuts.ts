@@ -9,6 +9,7 @@ export function useCanvasShortcuts() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!useStudioStore.getState().capabilities.canEditCanvas) return;
       // Ignore if typing in input/textarea
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 

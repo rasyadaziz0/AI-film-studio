@@ -17,27 +17,74 @@ export class StudioCRUD {
       return;
     }
 
-    const { data: studios, error } = await supabase
+    let { data: studios, error } = await supabase
       .from("studios")
-      .select("id, user_id, name, niche, mode, video_duration, template, default_model, telegram_mode, telegram_chat_id, created_at, updated_at")
+      .select("id, user_id, name, niche, mode, video_duration, template, default_model, telegram_mode, telegram_chat_id, sharing_visibility, share_token, created_at, updated_at")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("[StudioCRUD] Error fetching studios:", error);
+      if (error.code === '42P17') {
+        console.error("[StudioCRUD] ⚠️ INFINITE RECURSION RLS (Error 42P17) terdeteksi pada tabel studios! Silakan jalankan script fase_c_collaboration.sql terbaru yang menggunakan SECURITY DEFINER di Supabase SQL Editor Anda.");
+        return;
+      }
+      if (error.code === 'PGRST204' || error.message?.includes('sharing_visibility')) {
+        console.warn("[StudioCRUD] Kolom kolaborator belum ada di schema cache. Menggunakan fallback query dasar. Silakan jalankan fase_c_collaboration.sql di Supabase.");
+        const res = await supabase
+          .from("studios")
+          .select("id, user_id, name, niche, mode, video_duration, template, default_model, telegram_mode, telegram_chat_id, created_at, updated_at")
+          .order("created_at", { ascending: false });
+        studios = res.data ? res.data.map((s: any) => ({ ...s, sharing_visibility: 'private', share_token: null })) : null;
+        error = res.error;
+      }
+    }
+
+    if (error) {
+      console.error("[StudioCRUD] Error fetching studios:", error.message || JSON.stringify(error));
       return;
     }
 
+    // Query permanent collaborations for this user
+    const { data: collabs } = await supabase
+      .from("studio_collaborators")
+      .select("studio_id, role")
+      .or(`user_id.eq.${user.id},user_email.eq.${user.email || ""}`);
+
+    const collabMap = new Map<string, string>();
+    if (collabs) {
+      collabs.forEach(c => collabMap.set(c.studio_id, c.role));
+    }
+
     const rawStudios = studios || [];
-    const safeStudios = rawStudios.map((s: any) => {
-      const rawModel = s.default_model || "qwen-plus";
-      const model = rawModel.split("###")[0] || "qwen-plus";
-      const lang = rawModel.includes("###") ? rawModel.split("###")[1] : "English";
-      return {
-        ...s,
-        default_model: model,
-        language: lang,
-      };
-    });
+    const safeStudios = rawStudios
+      .map((s: any) => {
+        const rawModel = s.default_model || "qwen-plus";
+        const model = rawModel.split("###")[0] || "qwen-plus";
+        const lang = rawModel.includes("###") ? rawModel.split("###")[1] : "English";
+
+        let accessSource: 'owner' | 'collaborator' | 'shared_link' = 'owner';
+        let role: 'owner' | 'editor' | 'viewer' = 'owner';
+
+        if (s.user_id === user.id) {
+          accessSource = 'owner';
+          role = 'owner';
+        } else if (collabMap.has(s.id)) {
+          accessSource = 'collaborator';
+          role = (collabMap.get(s.id) as any) || 'viewer';
+        } else {
+          accessSource = 'shared_link';
+          role = 'viewer';
+        }
+
+        return {
+          ...s,
+          default_model: model,
+          language: lang,
+          accessSource,
+          role,
+        };
+      })
+      // Filter out ephemeral shared_link sessions so they are never persisted to the dashboard list
+      .filter((s: any) => s.accessSource !== 'shared_link');
 
     this.set({ studios: safeStudios });
 

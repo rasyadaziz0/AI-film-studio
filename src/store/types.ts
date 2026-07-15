@@ -15,6 +15,10 @@ export type Studio = {
   telegram_chat_id?: string | null;
   telegram_webhook_secret?: string | null;
   telegram_mode?: "none" | "output_only" | "full_telegram";
+  sharing_visibility?: string;
+  share_token?: string;
+  role?: 'owner' | 'editor' | 'viewer';
+  accessSource?: 'owner' | 'collaborator' | 'shared_link';
   created_at?: string;
   updated_at?: string;
 };
@@ -25,6 +29,22 @@ export type StudioState = {
   edges: Edge[];
   toolMode: "pointer" | "hand";
   
+  // Collaboration Access & Capabilities
+  capabilities: {
+    canView: boolean;
+    canEditCanvas: boolean;
+    canRun: boolean;
+    canManageSharing: boolean;
+    canDelete: boolean;
+  };
+  role: 'owner' | 'editor' | 'viewer';
+  accessSource: 'owner' | 'collaborator' | 'shared_link';
+  setAccessCapabilities: (
+    role: 'owner' | 'editor' | 'viewer',
+    accessSource: 'owner' | 'collaborator' | 'shared_link',
+    capabilities: StudioState['capabilities']
+  ) => void;
+
   // History State
   history: {
     past: { nodes: Node[]; edges: Edge[] }[];
@@ -55,7 +75,7 @@ export type StudioState = {
   activeStudioId: string | null;
   fetchStudios: () => Promise<void>;
   loadStudio: (studioId: string) => Promise<void>;
-  saveStudio: () => Promise<void>;
+  saveStudio: () => Promise<void | boolean>;
   createStudio: (name: string, wajib?: WajibTemplate, tambahan?: TambahanTemplate) => Promise<void>;
   updateStudio: (updates: Partial<Studio>, id?: string) => Promise<void>;
   deleteStudio: (studioId: string) => Promise<void>;

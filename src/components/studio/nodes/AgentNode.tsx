@@ -43,9 +43,10 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
           <Icon size={14} className={colors.color} strokeWidth={2} />
           <Select 
             value={data.type} 
+            disabled={!store?.capabilities?.canEditCanvas}
             onValueChange={(val) => presenter.handleChangeType(val as AgentType)}
           >
-            <SelectTrigger className="h-auto p-0 bg-transparent border-0 shadow-none text-[11px] font-bold tracking-wide text-[#e0e0e0] hover:text-white transition-colors focus:ring-0 [&>svg]:opacity-0 group-hover:[&>svg]:opacity-50 [&>svg]:ml-1 [&>svg]:h-3 [&>svg]:w-3">
+            <SelectTrigger className="h-auto p-0 bg-transparent border-0 shadow-none text-[11px] font-bold tracking-wide text-[#e0e0e0] hover:text-white transition-colors focus:ring-0 [&>svg]:opacity-0 group-hover:[&>svg]:opacity-50 [&>svg]:ml-1 [&>svg]:h-3 [&>svg]:w-3 disabled:opacity-80">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#2c2c2c] border-[#444444] text-[#e0e0e0] rounded-md shadow-lg text-[11px]">
@@ -104,14 +105,18 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
             </span>
           )}
           <div className="h-3 w-px bg-[#444444] shrink-0"></div>
-          <button 
-            onClick={() => presenter.handleDelete()}
-            className="text-[#8c8c8c] hover:text-[#f24e1e] transition-colors cursor-pointer shrink-0"
-            title="Delete Node"
-          >
-            <Trash2 size={12} />
-          </button>
-          <GripHorizontal className="text-[#8c8c8c] hover:text-[#e0e0e0] drag-handle cursor-grab active:cursor-grabbing transition-colors shrink-0" size={12} />
+          {store?.capabilities?.canEditCanvas && (
+            <button 
+              onClick={() => presenter.handleDelete()}
+              className="text-[#8c8c8c] hover:text-[#f24e1e] transition-colors cursor-pointer shrink-0"
+              title="Delete Node"
+            >
+              <Trash2 size={12} />
+            </button>
+          )}
+          {store?.capabilities?.canEditCanvas && (
+            <GripHorizontal className="text-[#8c8c8c] hover:text-[#e0e0e0] drag-handle cursor-grab active:cursor-grabbing transition-colors shrink-0" size={12} />
+          )}
         </div>
       </div>
 
@@ -121,7 +126,7 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
         {presenter.renderBody(expanded, setExpanded)}
 
         {/* Advanced Settings Toggle */}
-        {presenter.hasAIProviderSettings() && (
+        {presenter.hasAIProviderSettings() && store?.capabilities?.canEditCanvas && (
           <>
             <button
               onClick={() => setShowSettings(!showSettings)}
@@ -134,18 +139,20 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
         )}
 
         {/* Run Button */}
-        <button
-          onClick={() => presenter.handleRun()}
-          disabled={presenter.isRunning()}
-          className={`mt-1 flex w-full items-center justify-center gap-1.5 rounded-[4px] py-1.5 text-[11px] font-bold transition-all ${
-            presenter.isRunning()
-              ? "bg-[#1e1e1e] text-[#8c8c8c] cursor-not-allowed border border-[#444444]"
-              : "bg-[#18a0fb] text-white hover:bg-[#0d8be8] border border-transparent"
-          }`}
-        >
-          {presenter.isRunning() ? <Loader2 className="animate-spin" size={12} /> : <Play size={12} fill="currentColor" />}
-          {presenter.isRunning() ? "Running..." : "Run"}
-        </button>
+        {store?.capabilities?.canRun && (
+          <button
+            onClick={() => presenter.handleRun()}
+            disabled={presenter.isRunning()}
+            className={`mt-1 flex w-full items-center justify-center gap-1.5 rounded-[4px] py-1.5 text-[11px] font-bold transition-all ${
+              presenter.isRunning()
+                ? "bg-[#1e1e1e] text-[#8c8c8c] cursor-not-allowed border border-[#444444]"
+                : "bg-[#18a0fb] text-white hover:bg-[#0d8be8] border border-transparent"
+            }`}
+          >
+            {presenter.isRunning() ? <Loader2 className="animate-spin" size={12} /> : <Play size={12} fill="currentColor" />}
+            {presenter.isRunning() ? "Running..." : "Run"}
+          </button>
+        )}
       </div>
 
       {/* Handles (Perimeter Connection Ports) */}

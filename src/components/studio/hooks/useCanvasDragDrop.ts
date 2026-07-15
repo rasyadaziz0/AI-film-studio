@@ -16,6 +16,7 @@ export function useCanvasDragDrop(
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
+      if (!useStudioStore.getState().capabilities.canEditCanvas) return;
 
       if (!reactFlowInstance || !reactFlowWrapper.current) return;
 
@@ -37,6 +38,7 @@ export function useCanvasDragDrop(
   );
 
   const onNodeDragStart = useCallback(() => {
+    if (!useStudioStore.getState().capabilities.canEditCanvas) return;
     saveHistory();
   }, [saveHistory]);
 

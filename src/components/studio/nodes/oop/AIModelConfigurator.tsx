@@ -14,6 +14,7 @@ export const AIModelConfigurator: React.FC<AIModelConfiguratorProps> = ({ presen
       <label className="text-[10px] font-medium text-[#8c8c8c]">Model (Qwen DashScope)</label>
       <Select
         value={data.model || "default"}
+        disabled={!store?.capabilities?.canEditCanvas}
         onValueChange={(val) => {
           store.updateNodeData(id, {
             provider: "qwen",

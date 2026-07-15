@@ -21,6 +21,7 @@ export function useCanvasAutoSave(studioId: string) {
   // Auto-save effect (Debounced)
   useEffect(() => {
     if (!hasLoaded.current) return;
+    if (!useStudioStore.getState().capabilities.canEditCanvas) return;
 
     // Do not auto-save from frontend while the server engine is actively running or queued!
     const isAnyRunning = nodes.some(n => n.data.status === "running" || n.data.status === "queued");

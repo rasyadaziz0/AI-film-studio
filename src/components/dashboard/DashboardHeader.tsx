@@ -21,7 +21,7 @@ export function DashboardHeader() {
         <button className="rounded-md p-2 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200" title="Settings">
           <Settings size={18} />
         </button>
-        <button 
+        <button
           onClick={handleLogout}
           className="rounded-md p-2 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-red-400"
           title="Log out"

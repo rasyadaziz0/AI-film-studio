@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Film, Play, Save, Send, ArrowLeft, Loader2, Square } from "lucide-react";
+import { Film, Play, Save, Send, ArrowLeft, Loader2, Square, Share2, Users } from "lucide-react";
 import { useStudioStore } from "@/store/useStudioStore";
 import TelegramConfigModal from "@/components/studio/TelegramConfigModal";
+import CollaborationShareModal from "@/components/studio/layout/CollaborationShareModal";
 import { supabase } from "@/lib/supabase";
 
 export default function StudioLayout({
@@ -12,7 +13,7 @@ export default function StudioLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { studios, activeStudioId, loadStudio, createStudio, updateStudio, nodes } = useStudioStore();
+  const { studios, activeStudioId, loadStudio, createStudio, updateStudio, nodes, capabilities, role, accessSource } = useStudioStore();
   const activeStudio = studios.find(s => s.id === activeStudioId);
   const isPipelineRunning = nodes.some(n => n.data.status === "running" || n.data.status === "queued");
   const router = useRouter();
@@ -20,12 +21,14 @@ export default function StudioLayout({
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push("/");
+        const returnUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/dashboard";
+        router.push(`/?redirect=${encodeURIComponent(returnUrl)}`);
       } else {
         setIsLoadingAuth(false);
       }
@@ -80,6 +83,11 @@ export default function StudioLayout({
           <div className="flex items-center gap-2 text-indigo-400">
             <Film size={20} />
             <span className="font-semibold text-zinc-100 hidden sm:inline-block">AI Film Studio</span>
+            {!capabilities.canEditCanvas && (
+              <span className="ml-2 rounded bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-400 border border-amber-500/30">
+                VIEW ONLY
+              </span>
+            )}
           </div>
 
           <nav className="flex items-center gap-1">
@@ -103,41 +111,45 @@ export default function StudioLayout({
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={async () => {
-              if (!activeStudioId) return;
-              await useStudioStore.getState().saveStudio();
-            }}
-            disabled={!activeStudioId}
-            className="flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white border border-zinc-700 disabled:opacity-50"
-          >
-            <Save size={14} />
-            Save
-          </button>
+          {capabilities.canEditCanvas && (
+            <button
+              onClick={async () => {
+                if (!activeStudioId) return;
+                await useStudioStore.getState().saveStudio();
+              }}
+              disabled={!activeStudioId}
+              className="flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-1.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white border border-zinc-700 disabled:opacity-50"
+            >
+              <Save size={14} />
+              Save
+            </button>
+          )}
           
-          <button
-            onClick={() => useStudioStore.getState().runPipeline()}
-            disabled={isPipelineRunning}
-            className={`flex items-center gap-2 rounded-lg px-5 py-1.5 text-sm font-medium text-white transition-all shadow-sm ${
-              isPipelineRunning 
-                ? "bg-amber-600/90 cursor-not-allowed border border-amber-500/80 animate-pulse shadow-amber-900/40" 
-                : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-900/20"
-            }`}
-          >
-            {isPipelineRunning ? (
-              <>
-                <Loader2 size={14} className="animate-spin shrink-0" />
-                Pipeline Berjalan...
-              </>
-            ) : (
-              <>
-                <Play size={14} fill="currentColor" />
-                Run Pipeline
-              </>
-            )}
-          </button>
+          {capabilities.canRun && (
+            <button
+              onClick={() => useStudioStore.getState().runPipeline()}
+              disabled={isPipelineRunning}
+              className={`flex items-center gap-2 rounded-lg px-5 py-1.5 text-sm font-medium text-white transition-all shadow-sm ${
+                isPipelineRunning 
+                  ? "bg-amber-600/90 cursor-not-allowed border border-amber-500/80 animate-pulse shadow-amber-900/40" 
+                  : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-900/20"
+              }`}
+            >
+              {isPipelineRunning ? (
+                <>
+                  <Loader2 size={14} className="animate-spin shrink-0" />
+                  Pipeline Berjalan...
+                </>
+              ) : (
+                <>
+                  <Play size={14} fill="currentColor" />
+                  Run Pipeline
+                </>
+              )}
+            </button>
+          )}
 
-          {isPipelineRunning && (
+          {isPipelineRunning && capabilities.canRun && (
             <button
               onClick={async () => {
                 if (!activeStudioId) return;
@@ -163,6 +175,15 @@ export default function StudioLayout({
 
           <div className="h-5 w-px bg-zinc-700 mx-2 hidden sm:block"></div>
 
+          <button
+            onClick={() => setIsShareModalOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors border border-zinc-700/80"
+            title="Bagikan & Kolaborasikan Studio"
+          >
+            <Users size={14} className="text-indigo-400" />
+            <span>Bagikan</span>
+          </button>
+
           <button 
             onClick={() => setIsTelegramModalOpen(true)}
             className="rounded-md p-2 text-blue-400 transition-colors hover:bg-zinc-800 hover:text-blue-300"
@@ -183,7 +204,8 @@ export default function StudioLayout({
               placeholder="e.g. T-Rex pecinta kalkulus (mematikan mode manual)"
               value={activeStudio.niche || ""}
               onChange={(e) => updateStudio({ niche: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
+              disabled={!capabilities.canEditCanvas}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
           <div className="w-px h-6 bg-zinc-800"></div>
@@ -194,7 +216,8 @@ export default function StudioLayout({
               placeholder="Auto-generated atau ketik sendiri..."
               value={activeStudio.name || ""}
               onChange={(e) => updateStudio({ name: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
+              disabled={!capabilities.canEditCanvas}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
           <div className="w-px h-6 bg-zinc-800"></div>
@@ -203,7 +226,8 @@ export default function StudioLayout({
             <select
               value={activeStudio.video_duration || 5}
               onChange={(e) => updateStudio({ video_duration: parseInt(e.target.value) })}
-              className="bg-zinc-950 text-sm font-medium text-zinc-200 rounded-md px-3 py-1.5 outline-none focus:border-indigo-500 border border-zinc-800 cursor-pointer transition-colors"
+              disabled={!capabilities.canEditCanvas}
+              className="bg-zinc-950 text-sm font-medium text-zinc-200 rounded-md px-3 py-1.5 outline-none focus:border-indigo-500 border border-zinc-800 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <option value={5}>5 Detik</option>
               <option value={15}>15 Detik</option>
@@ -216,7 +240,8 @@ export default function StudioLayout({
             <select
               value={activeStudio.language || "English"}
               onChange={(e) => updateStudio({ language: e.target.value })}
-              className="bg-zinc-950 text-sm font-medium text-zinc-200 rounded-md px-3 py-1.5 outline-none focus:border-indigo-500 border border-zinc-800 cursor-pointer transition-colors"
+              disabled={!capabilities.canEditCanvas}
+              className="bg-zinc-950 text-sm font-medium text-zinc-200 rounded-md px-3 py-1.5 outline-none focus:border-indigo-500 border border-zinc-800 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <option value="English">English (EN)</option>
               <option value="Bahasa Indonesia">Indonesia (ID)</option>
@@ -236,7 +261,11 @@ export default function StudioLayout({
         {children}
       </main>
 
-
+      {/* Collaboration Share Modal */}
+      <CollaborationShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+      />
 
       {/* Telegram Config Modal */}
       <TelegramConfigModal 
@@ -246,3 +275,4 @@ export default function StudioLayout({
     </div>
   );
 }
+

@@ -31,7 +31,8 @@ export class InputPresenter extends BaseNodePresenter {
       <div className="space-y-1">
         <label className="text-[10px] font-medium text-[#aaaaaa]">Prompt Manual</label>
         <textarea
-          className="nodrag w-full h-16 rounded-[4px] bg-[#1e1e1e] border border-[#333333] p-2 text-xs text-[#f0f0f0] placeholder-[#555555] focus:outline-none focus:border-[#4ea8de] resize-none"
+          disabled={!this.store?.capabilities?.canEditCanvas}
+          className="nodrag w-full h-16 rounded-[4px] bg-[#1e1e1e] border border-[#333333] p-2 text-xs text-[#f0f0f0] placeholder-[#555555] focus:outline-none focus:border-[#4ea8de] resize-none disabled:opacity-60 disabled:cursor-not-allowed"
           placeholder="Ketik ide video di sini..."
           value={this.data.config?.prompt || ""}
           onChange={(e) => this.updateConfig({ prompt: e.target.value })}
@@ -147,14 +148,17 @@ export class ActorPresenter extends BaseNodePresenter {
         <div className="space-y-1">
           <div className="flex justify-between items-center">
             <label className="text-[10px] font-medium text-[#8c8c8c]">Prompt Karakter (opsional)</label>
-            <label className="flex items-center gap-1 text-[9px] text-[#18a0fb] hover:text-[#0d8be8] transition-colors cursor-pointer font-medium">
-              <Upload size={9} />
-              Upload Foto
-              <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-            </label>
+            {this.store?.capabilities?.canEditCanvas && (
+              <label className="flex items-center gap-1 text-[9px] text-[#18a0fb] hover:text-[#0d8be8] transition-colors cursor-pointer font-medium">
+                <Upload size={9} />
+                Upload Foto
+                <input type="file" accept="image/*" className="hidden" disabled={!this.store?.capabilities?.canEditCanvas} onChange={handleUpload} />
+              </label>
+            )}
           </div>
           <textarea
-            className="nodrag w-full h-12 rounded-[4px] bg-[#1e1e1e] border border-[#333333] p-1.5 text-[10px] text-[#f0f0f0] placeholder-[#555555] focus:outline-none focus:border-blue-500 resize-none"
+            disabled={!this.store?.capabilities?.canEditCanvas}
+            className="nodrag w-full h-12 rounded-[4px] bg-[#1e1e1e] border border-[#333333] p-1.5 text-[10px] text-[#f0f0f0] placeholder-[#555555] focus:outline-none focus:border-blue-500 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
             placeholder='misal: "Detektif penjelajah waktu dengan mantel parit..."'
             value={actorPrompt}
             onChange={(e) => this.updateConfig({ actor_prompt: e.target.value })}
