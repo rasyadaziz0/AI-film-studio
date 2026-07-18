@@ -119,7 +119,8 @@ export class TelegramSendHandler extends BaseNodeHandler {
         };
       }
 
-      const res = await fetch(`https://api.telegram.org/bot${botToken}/${apiMethod}`, {
+      const telegramApi = process.env.TELEGRAM_API_URL || "https://api.telegram.org";
+      const res = await fetch(`${telegramApi}/bot${botToken}/${apiMethod}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyPayload),

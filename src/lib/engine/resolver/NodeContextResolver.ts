@@ -45,13 +45,13 @@ export class NodeContextResolver {
     studio: StudioConfig | null,
     job: JobConfig | null
   ): Promise<{ corePrompt: string; upstreamContext: string; finalUserInput: string; nodeModel: string; language: string }> {
-    let inputNode = upstreamNodes.find((n) => n.type === "input");
+    let inputNode = upstreamNodes.find((n) => n.type === "input" || n.type === "telegram_trigger");
     if (!inputNode) {
       const { data: studioInputNode } = await supabase
         .from("nodes")
         .select("user_input, output")
         .eq("studio_id", studioId)
-        .eq("type", "input")
+        .in("type", ["input", "telegram_trigger"])
         .limit(1)
         .maybeSingle();
       if (studioInputNode) inputNode = studioInputNode;

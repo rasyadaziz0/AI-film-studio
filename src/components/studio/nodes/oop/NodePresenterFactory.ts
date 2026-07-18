@@ -10,6 +10,7 @@ import {
   VideoPresenter,
   TelegramPresenter,
   CloudPresenter,
+  TelegramTriggerPresenter
 } from "./ConcretePresenters";
 
 export class NodePresenterFactory {
@@ -31,6 +32,8 @@ export class NodePresenterFactory {
         return new VideoPresenter(id, data, store);
       case "telegram":
         return new TelegramPresenter(id, data, store);
+      case "telegram_trigger":
+        return new TelegramTriggerPresenter(id, data, store);
       case "cloud":
         return new CloudPresenter(id, data, store);
       default:

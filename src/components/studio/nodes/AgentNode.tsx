@@ -50,7 +50,7 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#2c2c2c] border-[#444444] text-[#e0e0e0] rounded-md shadow-lg text-[11px]">
-              {(["input", "producer", "writer", "actor", "reviewer", "tts", "video", "telegram", "cloud"] as AgentType[]).map((typeKey) => {
+              {(["input", "telegram_trigger", "producer", "writer", "actor", "reviewer", "tts", "video", "telegram", "cloud"] as AgentType[]).map((typeKey) => {
                 const tempPresenter = NodePresenterFactory.create("temp", { type: typeKey, label: typeKey, status: "idle" }, null);
                 const TempIcon = tempPresenter.getIcon();
                 return (
@@ -79,6 +79,7 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
                   case "reviewer": return "Me-review...";
                   case "actor": return "Desain Karakter...";
                   case "tts": return "Merekam Suara...";
+                  case "telegram_trigger": return "Menunggu Prompt...";
                   case "telegram": return "Mengirim...";
                   case "cloud": return "Upload...";
                   default: return "Running...";

@@ -35,6 +35,7 @@ const nodeTypes: NodeTypes = {
   video: AgentNode,
   telegram: AgentNode,
   cloud: AgentNode,
+  telegram_trigger: AgentNode,
 };
 
 const edgeTypes = {
@@ -133,6 +134,7 @@ function FlowCanvas({ studioId }: { studioId: string }) {
                   case 'tts': return '#eab308';
                   case 'video': return '#f43f5e';
                   case 'telegram': return '#06b6d4';
+                  case 'telegram_trigger': return '#14b8a6';
                   default: return '#52525b';
                 }
               }}

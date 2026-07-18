@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Send } from "lucide-react";
 import { useStudioStore } from "@/store/useStudioStore";
+import { toast } from "@/lib/utils/toast";
 
 interface TelegramConfigModalProps {
   isOpen: boolean;
@@ -15,8 +16,6 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
   const [chatId, setChatId] = useState("");
   const [telegramMode, setTelegramMode] = useState<"none" | "output_only" | "full_telegram">("none");
   const [isSaving, setIsSaving] = useState(false);
-  const [webhookInfo, setWebhookInfo] = useState<{ webhookUrl?: string; webhookSecret?: string } | null>(null);
-
   // Load existing data when modal opens or active studio changes
   useEffect(() => {
     if (activeStudio && isOpen) {
@@ -53,8 +52,10 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
       });
 
       const result = await res.json();
-      if (result.webhookUrl) {
-        setWebhookInfo({ webhookUrl: result.webhookUrl, webhookSecret: result.webhookSecret });
+      if (!res.ok || result.error) {
+        alert(result.error || "Gagal menyimpan konfigurasi Telegram.");
+        setIsSaving(false);
+        return; // Don't close modal, let user fix it
       }
 
       // Update non-secret studio fields locally
@@ -62,15 +63,23 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
         telegram_chat_id: chatId,
         telegram_mode: telegramMode,
       });
+
+      toast.success(
+        "Tersimpan!", 
+        telegramMode !== "none" ? "Cek Telegram Anda untuk pesan konfirmasi." : "Integrasi Telegram dinonaktifkan."
+      );
     } catch (err) {
       console.error("[TelegramConfig] Save failed:", err);
+      alert("Terjadi kesalahan saat menyimpan pengaturan Telegram.");
+      setIsSaving(false);
+      return;
     } finally {
       setIsSaving(false);
     }
 
     // Auto-inject Telegram node when mode is enabled and none exists on canvas
     if (telegramMode !== "none") {
-      const { nodes, edges, addNode, onConnect } = useStudioStore.getState();
+      const { nodes, edges, addNode, changeNodeType, onConnect } = useStudioStore.getState();
       const hasTelegramNode = nodes.some((n) => n.type === "telegram");
 
       if (!hasTelegramNode) {
@@ -81,10 +90,9 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
 
         // Find terminal nodes (nodes with no outgoing edges)
         const nodesWithOutgoing = new Set(edges.map((e) => e.source));
-        const terminalNodes = nodes.filter((n) => !nodesWithOutgoing.has(n.id));
+        const terminalNodes = nodes.filter((n) => !nodesWithOutgoing.has(n.id) && n.type !== "telegram_trigger");
 
         if (terminalNodes.length > 0) {
-          // Pick the terminal node with highest x position
           const best = terminalNodes.reduce((a, b) =>
             (a.position?.x ?? 0) >= (b.position?.x ?? 0) ? a : b
           );
@@ -92,7 +100,6 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
           maxY = best.position?.y ?? 200;
           lastNodeId = best.id;
         } else if (nodes.length > 0) {
-          // Fallback: rightmost node
           const rightmost = nodes.reduce((a, b) =>
             (a.position?.x ?? 0) >= (b.position?.x ?? 0) ? a : b
           );
@@ -116,11 +123,27 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
           });
         }
       }
+
+      // If full_telegram, make sure there is a telegram_trigger
+      if (telegramMode === "full_telegram") {
+        const { nodes: currentNodes } = useStudioStore.getState();
+        const hasTrigger = currentNodes.some((n) => n.type === "telegram_trigger");
+        
+        if (!hasTrigger) {
+          // If there is an input node, replace it with telegram_trigger
+          const inputNode = currentNodes.find((n) => n.type === "input");
+          if (inputNode) {
+            changeNodeType(inputNode.id, "telegram_trigger" as any);
+          } else {
+            // Find leftmost node to place trigger before it
+            const leftmost = currentNodes.length > 0 ? currentNodes.reduce((a, b) => (a.position?.x ?? 0) <= (b.position?.x ?? 0) ? a : b) : null;
+            addNode("telegram_trigger" as any, { x: leftmost ? (leftmost.position?.x ?? 0) - 350 : 0, y: leftmost ? (leftmost.position?.y ?? 0) : 200 });
+          }
+        }
+      }
     }
 
-    if (!webhookInfo) {
-      onClose();
-    }
+    onClose();
   };
 
   return (

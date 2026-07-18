@@ -238,6 +238,26 @@ export class TelegramPresenter extends BaseNodePresenter {
   }
 }
 
+export class TelegramTriggerPresenter extends BaseNodePresenter {
+  public getIcon() { return Sparkles; }
+  public getColors(): NodeColors {
+    return { color: "text-teal-400", bg: "bg-teal-500/10", border: "border-teal-500/30", ring: "ring-teal-500/50" };
+  }
+  public canHaveInputs() { return false; }
+  public hasAIProviderSettings() { return false; }
+
+  public renderBody(): React.ReactNode {
+    return (
+      <div className="rounded-[4px] bg-teal-500/10 border border-teal-500/30 p-2 space-y-1">
+        <p className="text-[10px] text-teal-400 font-medium">Telegram Trigger</p>
+        <p className="text-[9px] text-[#8c8c8c]">
+          Menunggu prompt dikirimkan melalui Telegram Bot Anda (mode full_telegram).
+        </p>
+      </div>
+    );
+  }
+}
+
 export class CloudPresenter extends BaseNodePresenter {
   public getIcon() { return Cloud; }
   public getColors(): NodeColors {
