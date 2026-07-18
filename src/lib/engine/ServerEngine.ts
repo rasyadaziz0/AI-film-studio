@@ -99,7 +99,7 @@ export class ServerEngine {
       .single();
     if (!node) return;
 
-    if (node.type === "input") {
+    if (node.type === "input" || node.type === "telegram_trigger") {
       await this.supabase.from("nodes").update({ status: "done" }).eq("id", nodeId);
       return;
     }
