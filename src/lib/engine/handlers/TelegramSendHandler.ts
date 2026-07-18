@@ -1,5 +1,5 @@
 import { BaseNodeHandler, ExecutionContext } from "./BaseNodeHandler";
-import { decrypt } from "../../../../ecs/src/lib/crypto";
+import { decrypt } from "../../crypto";
 
 /**
  * TelegramSendHandler — Sends upstream media (video/audio/image) to Telegram.
