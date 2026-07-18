@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return handleProxy(req, params.path);
+export async function POST(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
+  const { path } = await context.params;
+  return handleProxy(req, path || []);
 }
 
-export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
-  return handleProxy(req, params.path);
+export async function GET(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
+  const { path } = await context.params;
+  return handleProxy(req, path || []);
 }
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
