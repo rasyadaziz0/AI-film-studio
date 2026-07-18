@@ -6,6 +6,7 @@ import { ReviewerHandler } from "./ReviewerHandler";
 import { CloudHandler } from "./CloudHandler";
 import { TelegramSendHandler } from "./TelegramSendHandler";
 import { DefaultTextHandler } from "./DefaultTextHandler";
+import { InputHandler } from "./InputHandler";
 
 export class NodeHandlerFactory {
   public static getHandler(nodeType: string): BaseNodeHandler {
@@ -22,6 +23,9 @@ export class NodeHandlerFactory {
         return new CloudHandler();
       case "telegram":
         return new TelegramSendHandler();
+      case "input":
+      case "telegram_trigger":
+        return new InputHandler();
       default:
         return new DefaultTextHandler();
     }
