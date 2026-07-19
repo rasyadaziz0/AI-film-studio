@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const RELAY_SECRET = process.env.TELEGRAM_RELAY_SECRET;
+
 export async function POST(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   const { path } = await context.params;
   return handleProxy(req, path || []);
@@ -11,6 +13,10 @@ export async function GET(req: NextRequest, context: { params: Promise<{ path?: 
 }
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
+  if (RELAY_SECRET && req.headers.get("x-relay-secret") !== RELAY_SECRET) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     const telegramPath = pathArray ? pathArray.join("/") : "";
     const url = new URL(`https://api.telegram.org/${telegramPath}`);

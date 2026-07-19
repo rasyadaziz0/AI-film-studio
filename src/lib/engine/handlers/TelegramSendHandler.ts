@@ -120,9 +120,13 @@ export class TelegramSendHandler extends BaseNodeHandler {
       }
 
       const telegramApi = process.env.TELEGRAM_API_URL || "https://api.telegram.org";
+      const relaySecret = process.env.TELEGRAM_RELAY_SECRET;
       const res = await fetch(`${telegramApi}/bot${botToken}/${apiMethod}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(relaySecret ? { "x-relay-secret": relaySecret } : {}),
+        },
         body: JSON.stringify(bodyPayload),
       });
 
