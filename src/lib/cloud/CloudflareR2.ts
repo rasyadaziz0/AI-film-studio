@@ -13,6 +13,7 @@ export class CloudflareR2 {
     return new S3Client({
       region: "auto",
       endpoint,
+      forcePathStyle: true,
       credentials: {
         accessKeyId,
         secretAccessKey,
