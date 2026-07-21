@@ -79,7 +79,7 @@ export class ActorPresenter extends BaseNodePresenter {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${session?.access_token}`,
           },
-          body: JSON.stringify({ prompt: actorPrompt, studioId: this.data.studio_id }),
+          body: JSON.stringify({ prompt: actorPrompt, studioId: this.store.activeStudioId || this.data.studio_id }),
         });
         const data = await res.json();
         if (data.url) {
@@ -105,7 +105,7 @@ export class ActorPresenter extends BaseNodePresenter {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
         const { supabase } = await import("@/lib/supabase");
         const { data: { session } } = await supabase.auth.getSession();
-        const studioId = this.data.studio_id;
+        const studioId = this.store.activeStudioId || this.data.studio_id;
 
         const presignRes = await fetch(`${apiUrl}/v1/ai/upload-actor/presign`, {
           method: "POST",
