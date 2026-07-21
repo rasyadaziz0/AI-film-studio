@@ -132,11 +132,16 @@ export class ActorPresenter extends BaseNodePresenter {
           body: file,
         });
 
-        this.store.updateNodeData(this.id, { 
+        // Segera simpan ke DB secara langsung agar tidak di-overwrite oleh sinkronisasi otomatis (pollStatus)
+        const updatedData = { 
           output_url: presignData.publicUrl, 
           status: "done",
           config: { ...this.data.config, uploaded_image_url: presignData.publicUrl }
-        });
+        };
+        await supabase.from("nodes").update(updatedData).eq("id", this.id);
+
+        // Setelah DB aman, update UI lokal
+        this.store.updateNodeData(this.id, updatedData);
       } catch {
         this.store.updateNodeData(this.id, { status: "error" });
       }
