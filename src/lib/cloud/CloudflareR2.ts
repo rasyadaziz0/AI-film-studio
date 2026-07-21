@@ -199,4 +199,40 @@ export class CloudflareR2 {
 
     throw new Error(`Failed to download media from ${urlOrKey}`);
   }
+
+  /**
+   * Generates a presigned URL for direct browser upload to Cloudflare R2.
+   * Returns { uploadUrl, objectKey, publicUrl }.
+   */
+  public static async generatePresignedUpload(
+    prefix: string,
+    filename: string,
+    contentType: string
+  ): Promise<{ uploadUrl: string; objectKey: string; publicUrl: string }> {
+    const bucket = process.env.R2_BUCKET;
+    const publicDomain = process.env.R2_PUBLIC_DOMAIN;
+
+    if (!bucket || !publicDomain) {
+      throw new Error("[CloudflareR2] Missing required env vars: R2_BUCKET, R2_PUBLIC_DOMAIN");
+    }
+
+    const client = this.getClient();
+    const ext = filename.split(".").pop() || "bin";
+    const objectKey = `${prefix}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const command = new PutObjectCommand({
+      Bucket: bucket,
+      Key: objectKey,
+      ContentType: contentType,
+    });
+
+    // Dynamically import to avoid breaking frontend where this might not be installed
+    const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
+    
+    // Generate URL valid for 15 minutes
+    const uploadUrl = await getSignedUrl(client, command, { expiresIn: 900 });
+    const publicUrl = `${publicDomain}/${objectKey}`;
+
+    return { uploadUrl, objectKey, publicUrl };
+  }
 }
