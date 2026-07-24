@@ -53,7 +53,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
 
       const result = await res.json();
       if (!res.ok || result.error) {
-        alert(result.error || "Gagal menyimpan konfigurasi Telegram.");
+        toast.error("Gagal Menyimpan", result.error || "Gagal menyimpan konfigurasi Telegram.");
         setIsSaving(false);
         return; // Don't close modal, let user fix it
       }
@@ -70,7 +70,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
       );
     } catch (err) {
       console.error("[TelegramConfig] Save failed:", err);
-      alert("Terjadi kesalahan saat menyimpan pengaturan Telegram.");
+      toast.error("Kesalahan Sistem", "Terjadi kesalahan saat menyimpan pengaturan Telegram.");
       setIsSaving(false);
       return;
     } finally {
