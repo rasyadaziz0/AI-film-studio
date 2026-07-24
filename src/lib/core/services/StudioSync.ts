@@ -6,10 +6,10 @@ export class StudioSync {
   constructor(
     private set: (partial: Partial<StudioState> | ((state: StudioState) => Partial<StudioState>)) => void,
     private get: () => StudioState
-  ) {}
+  ) { }
 
   public async loadStudio(studioId: string) {
-    console.log(`[StudioSync] Loading studio ${studioId}...`);
+
 
     const [nodesRes, edgesRes] = await Promise.all([
       // Client-side: uses anon key + RLS (no sensitive columns exposed)
@@ -59,7 +59,7 @@ export class StudioSync {
       markerEnd: { type: "arrowclosed" },
     }));
 
-    console.log(`[StudioSync] Loaded ${loadedNodes.length} nodes and ${loadedEdges.length} edges`);
+
 
     // Resolve deterministic access precedence when loading studio on client
     const { data: { user } } = await supabase.auth.getUser();
@@ -116,8 +116,8 @@ export class StudioSync {
       return false;
     }
 
-    console.log(`[StudioSync] Saving studio ${activeStudioId}...`);
-    
+
+
     // 1. Fetch existing IDs
     const [{ data: existingNodes }, { data: existingEdges }] = await Promise.all([
       supabase.from("nodes").select("id").eq("studio_id", activeStudioId),
@@ -152,7 +152,7 @@ export class StudioSync {
         model: n.data.model,
         config: n.data.config || {},
       }));
-      
+
       const { error: nodeError } = await supabase.from("nodes").upsert(nodesToUpsert);
       if (nodeError) console.error("[StudioSync] Failed to upsert nodes:", nodeError);
     }
@@ -170,14 +170,12 @@ export class StudioSync {
       const { error: edgeError } = await supabase.from("edges").upsert(edgesToUpsert);
       if (edgeError) console.error("[StudioSync] Failed to upsert edges:", edgeError);
     }
-
-    console.log("[StudioSync] Studio saved successfully via upsert!");
   }
 
   public async pollStatus() {
     const { activeStudioId, nodes, capabilities } = this.get();
     if (!activeStudioId) return;
-    
+
     const { data: dbNodes, error } = await supabase
       .from("nodes")
       .select("id, type, label, position_x, position_y, output, output_url, status, config")
@@ -230,8 +228,8 @@ export class StudioSync {
     const newNodes = nodes.map(n => {
       const dbNode = dbNodes.find(dbn => dbn.id === n.id);
       if (dbNode && (
-        dbNode.status !== n.data.status || 
-        dbNode.output !== n.data.output || 
+        dbNode.status !== n.data.status ||
+        dbNode.output !== n.data.output ||
         dbNode.output_url !== n.data.output_url
       )) {
         changed = true;

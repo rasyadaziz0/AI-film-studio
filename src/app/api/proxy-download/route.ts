@@ -7,7 +7,7 @@ import { requireAuth, AuthError } from "@/lib/auth/requireAuth";
  */
 const ALLOWED_HOSTNAMES = new Set([
   // Cloudflare R2 public bucket
-  "pub-5c1348173da449309e6eaf4e2e0140e4.r2.dev",
+  "cdn.acadlabs.fun",
   // DashScope media output (Singapore region)
   "dashscope-result-sg.oss-ap-southeast-1.aliyuncs.com",
   // DashScope compatible mode

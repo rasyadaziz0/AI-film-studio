@@ -7,10 +7,10 @@ export class StudioCRUD {
     private set: (partial: Partial<StudioState> | ((state: StudioState) => Partial<StudioState>)) => void,
     private get: () => StudioState,
     private loadStudioFn: (studioId: string) => Promise<void>
-  ) {}
+  ) { }
 
   public async fetchStudios() {
-    console.log("[StudioCRUD] Fetching studios...");
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       console.warn("[StudioCRUD] No authenticated user found.");
@@ -90,16 +90,16 @@ export class StudioCRUD {
 
     // If no studios exist, create a default one
     if (!safeStudios || safeStudios.length === 0) {
-      console.log("[StudioCRUD] No studios found, creating default studio...");
+
       await this.createStudio("My First Studio", "basic", "none");
     } else if (!this.get().activeStudioId) {
-      console.log("[StudioCRUD] Loading default active studio:", safeStudios[0].id);
+
       await this.loadStudioFn(safeStudios[0].id);
     }
   }
 
   public async createStudio(name: string, wajib: WajibTemplate = "basic", tambahan: TambahanTemplate = "none") {
-    console.log(`[StudioCRUD] Creating new studio: ${name}`);
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -184,8 +184,6 @@ export class StudioCRUD {
   }
 
   public async deleteStudio(studioId: string) {
-    console.log(`[StudioCRUD] Deleting studio ${studioId}...`);
-
     const { error } = await supabase
       .from("studios")
       .delete()
@@ -198,7 +196,7 @@ export class StudioCRUD {
 
     const { studios, activeStudioId } = this.get();
     const newStudios = studios.filter(s => s.id !== studioId);
-    
+
     this.set({ studios: newStudios });
 
     if (activeStudioId === studioId) {

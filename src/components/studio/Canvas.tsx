@@ -58,6 +58,25 @@ function FlowCanvas({ studioId }: { studioId: string }) {
 
   const activeStudio = useStudioStore((state) => state.studios.find(s => s.id === studioId));
 
+  const nodeTypesMemo = useMemo<NodeTypes>(() => ({
+    input: AgentNode,
+    producer: AgentNode,
+    writer: AgentNode,
+    actor: AgentNode,
+    reviewer: AgentNode,
+    tts: AgentNode,
+    video: AgentNode,
+    telegram: AgentNode,
+    cloud: AgentNode,
+    telegram_trigger: AgentNode,
+  }), []);
+
+  const edgeTypesMemo = useMemo(() => ({
+    default: DeletableEdge,
+  }), []);
+
+  const defaultEdgeOptions = useMemo(() => ({ type: 'default' }), []);
+
   return (
     <div className="flex h-full w-full flex-col bg-[#1e1e1e] overflow-hidden relative">
       <TopControls isSaving={isSaving} setIsInfoModalOpen={setIsInfoModalOpen} />
@@ -96,8 +115,8 @@ function FlowCanvas({ studioId }: { studioId: string }) {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
+            nodeTypes={nodeTypesMemo}
+            edgeTypes={edgeTypesMemo}
             defaultEdgeOptions={defaultEdgeOptions}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
