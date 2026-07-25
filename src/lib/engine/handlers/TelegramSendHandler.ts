@@ -101,6 +101,7 @@ export class TelegramSendHandler extends BaseNodeHandler {
       }
 
       // Initialize bot
+      // @ts-ignore - this file is only executed in ECS where the ecs folder exists
       const { TelegramBot } = await import("../../../../ecs/src/lib/telegram/TelegramBot");
       const bot = new TelegramBot(secrets as any);
 
