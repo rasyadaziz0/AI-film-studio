@@ -59,18 +59,18 @@ export abstract class BaseNodePresenter {
 
   public getBorderStyle(): string {
     if (this.isRunning()) {
-      return "border-amber-400 ring-2 ring-amber-400/50 shadow-[0_0_18px_rgba(251,191,36,0.5)]";
+      return "border-amber-400 ring-2 ring-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.6)]";
     }
     if (this.isQueued()) {
-      return "border-indigo-500/80 ring-1 ring-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.3)] animate-pulse";
+      return "border-indigo-500/80 ring-1 ring-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.4)] animate-pulse";
     }
     if (this.isDone()) {
-      return "border-emerald-500/80 shadow-[0_0_12px_rgba(16,185,129,0.25)]";
+      return "border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.3)]";
     }
     if (this.isError()) {
-      return "border-red-500 ring-1 ring-red-500/50 shadow-[0_0_12px_rgba(239,68,68,0.3)]";
+      return "border-red-500 ring-1 ring-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.4)]";
     }
-    return "border-[#444444] hover:border-[#8c8c8c]";
+    return "border-zinc-700/50 hover:border-zinc-500/80 hover:shadow-[0_0_10px_rgba(255,255,255,0.05)]";
   }
 
   // OOP Polymorphic behavior capabilities
@@ -176,7 +176,7 @@ export abstract class BaseNodePresenter {
         </div>
         {this.data.output && (
           <div
-            className={`rounded-[4px] bg-[#1e1e1e] p-2 text-[10px] text-[#e0e0e0] border border-[#444444] ${expanded ? "max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-[#444444]" : "line-clamp-3"
+            className={`rounded-[6px] bg-black/40 p-2.5 text-[10px] text-zinc-200 border border-zinc-700/50 shadow-inner ${expanded ? "max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700" : "line-clamp-3"
               }`}
           >
             {this.data.output}
@@ -204,7 +204,7 @@ export abstract class BaseNodePresenter {
           return (
             <div className="space-y-1.5 mt-1.5">
               {isImage && (
-                <div className="relative rounded overflow-hidden border border-[#333333] bg-[#111118]">
+                <div className="relative rounded-lg overflow-hidden border border-zinc-700/50 bg-black/60 shadow-inner">
                   <img
                     src={this.data.output_url}
                     alt="Node Output Preview"
@@ -216,14 +216,14 @@ export abstract class BaseNodePresenter {
                       if (parent && !parent.querySelector('.img-error-fallback')) {
                         const fallback = document.createElement('div');
                         fallback.className = 'img-error-fallback flex flex-col items-center justify-center p-3 text-center bg-[#151520] text-[#a0a0b0] text-[9px] gap-1 border border-amber-500/30 rounded';
-                        fallback.innerHTML = `<span class="text-amber-400 font-semibold">⚠️ Foto lama tidak dapat dimuat</span><span>Klik tombol <b class="text-blue-400">Run</b> atau <b class="text-blue-400">Upload Foto</b> untuk memuat ulang gambar.</span>`;
+                        fallback.innerHTML = `<span class="text-amber-400 font-semibold">⚠️ Image could not be loaded</span><span>Click the <b class="text-blue-400">Run</b> or <b class="text-blue-400">Upload Photo</b> button to reload the image.</span>`;
                         parent.appendChild(fallback);
                       }
                     }}
                   />
                   {this.data.type === "actor" && (
                     <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/70 text-[8px] text-emerald-400 font-bold">
-                      ✓ Karakter Aktif
+                      ✓ Active Character
                     </div>
                   )}
                 </div>
@@ -235,14 +235,14 @@ export abstract class BaseNodePresenter {
                   e.stopPropagation();
                   window.open(playerHref, "_blank");
                 }}
-                className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-[4px] border font-medium transition-all shadow-sm cursor-pointer text-[10px] ${
+                className={`w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-[6px] font-bold transition-all transform active:scale-95 shadow-md cursor-pointer text-[10px] ${
                   isAudio
-                    ? "bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 border-amber-500/30 text-amber-300"
-                    : "bg-gradient-to-r from-sky-500/20 to-purple-500/20 hover:from-sky-500/30 hover:to-purple-500/30 border-sky-500/30 text-sky-300"
+                    ? "bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30 text-amber-300 hover:shadow-amber-500/20"
+                    : "bg-gradient-to-r from-sky-500/20 to-purple-500/20 hover:from-sky-500/30 hover:to-purple-500/30 border border-sky-500/30 text-sky-300 hover:shadow-sky-500/20"
                 }`}
               >
                 <ExternalLink size={11} />
-                {isAudio ? "🎧 Putar di Audio Studio" : isVideo ? "🎬 Putar di Cinema Player" : isImage ? "🖼️ Buka Gambar Fullscreen" : "Buka File Output"}
+                {isAudio ? "🎧 Play in Audio Studio" : isVideo ? "🎬 Play in Cinema Player" : isImage ? "🖼️ Open Image Fullscreen" : "Open Output File"}
               </button>
             </div>
           );
@@ -256,7 +256,7 @@ export abstract class BaseNodePresenter {
     return (
       <div className="space-y-1">
         <label className="text-[10px] font-medium text-[#8c8c8c]">Instructions</label>
-        <div className="rounded-[4px] bg-[#1a1a1a] p-2 text-[10px] text-[#aaaaaa] border border-[#2a2a2a] line-clamp-2">
+        <div className="rounded-[6px] bg-black/40 p-2.5 text-[10px] text-zinc-400 border border-zinc-800/80 shadow-inner line-clamp-2">
           {this.data.config?.customRolePrompt || "Default AI instructions for this node type."}
         </div>
       </div>

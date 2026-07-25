@@ -43,7 +43,7 @@ export function CreateStudioModal({ isOpen, onClose, onCreate }: CreateStudioMod
 
         {/* Wajib Template */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Wajib (Required)</label>
+          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Required Base Template</label>
           <div className="flex flex-col gap-2">
             <label className="flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 cursor-pointer hover:border-zinc-700 transition-colors">
               <input type="radio" name="wajib" value="basic" checked={wajibSelection === "basic"} onChange={() => setWajibSelection("basic")} className="mt-0.5" />
@@ -71,7 +71,7 @@ export function CreateStudioModal({ isOpen, onClose, onCreate }: CreateStudioMod
 
         {/* Tambahan Template */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tambahan (Optional Add-on)</label>
+          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Optional Add-on</label>
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 cursor-pointer hover:border-zinc-700 transition-colors">
               <input type="radio" name="tambahan" value="none" checked={tambahanSelection === "none"} onChange={() => setTambahanSelection("none")} />

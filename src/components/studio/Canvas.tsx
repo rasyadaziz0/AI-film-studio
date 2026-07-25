@@ -85,7 +85,7 @@ function FlowCanvas({ studioId }: { studioId: string }) {
       {!capabilities.canEditCanvas && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-amber-500/30 bg-zinc-900/95 px-4 py-1.5 text-xs font-medium text-amber-300 shadow-xl backdrop-blur-md animate-fade-in pointer-events-auto">
           <Lock size={14} className="text-amber-400 shrink-0" />
-          <span>Spectator Mode (View Only) — Anda melihat workflow secara live dan tidak dapat mengubah node.</span>
+          <span>Spectator Mode (View Only) — You are watching the workflow live and cannot modify nodes.</span>
         </div>
       )}
 

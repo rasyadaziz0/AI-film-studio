@@ -56,7 +56,7 @@ function AudioPlayerContent({ initialUrl = "", initialTitle = "AI Studio Voiceov
         </div>
         <h1 className="text-xl font-bold">Audio URL Tidak Ditemukan</h1>
         <p className="text-sm text-[#8c8c8c] max-w-md">
-          Silakan buka penampil audio ini langsung melalui tombol Putar di Audio Studio dari dalam node TTS AI Film Studio.
+          Please open this audio player directly via the Play in Audio Studio button inside the AI Film Studio TTS node.
         </p>
         <button
           type="button"
@@ -109,7 +109,7 @@ function AudioPlayerContent({ initialUrl = "", initialTitle = "AI Studio Voiceov
             onEnded={() => setState((s) => ({ ...s, isPlaying: false }))}
             onPlay={() => setState((s) => ({ ...s, isPlaying: true }))}
             onPause={() => setState((s) => ({ ...s, isPlaying: false }))}
-            onError={() => setState((s) => ({ ...s, isLoading: false, error: "Gagal memuat file audio. URL tidak valid atau kadaluwarsa." }))}
+            onError={() => setState((s) => ({ ...s, isLoading: false, error: "Failed to load audio file. URL is invalid or expired." }))}
           />
 
           {/* Scrubber */}

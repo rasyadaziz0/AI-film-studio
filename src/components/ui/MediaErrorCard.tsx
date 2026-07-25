@@ -12,9 +12,9 @@ export interface MediaErrorCardProps {
 }
 
 export function MediaErrorCard({
-  title = "⚠️ Media Tidak Dapat Dimuat",
-  message = "File lama mengalami kegagalan proses atau kadaluwarsa.",
-  actionText = "Klik tombol Run atau Upload ulang untuk memperbarui.",
+  title = "⚠️ Media Could Not Be Loaded",
+  message = "The old file failed to process or has expired.",
+  actionText = "Click Run or Upload again to refresh.",
   onActionClick,
   accent = "amber",
 }: MediaErrorCardProps) {

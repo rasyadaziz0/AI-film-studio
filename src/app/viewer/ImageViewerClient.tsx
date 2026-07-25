@@ -47,7 +47,7 @@ function ImageViewerContent({ initialUrl = "", initialTitle = "AI Studio Image O
         </div>
         <h1 className="text-xl font-bold">Media URL Tidak Ditemukan</h1>
         <p className="text-sm text-[#8c8c8c] max-w-md">
-          Silakan buka penampil gambar ini langsung melalui tombol Buka Gambar di dalam AI Film Studio.
+          Please open this image viewer directly via the Open Image button inside AI Film Studio.
         </p>
         <button
           type="button"

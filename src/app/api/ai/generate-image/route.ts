@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     if (reserveErr) {
       console.error("[generate-image] RPC Error:", reserveErr);
-      return NextResponse.json({ error: "Gagal memverifikasi limit harian" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to verify daily limit" }, { status: 500 });
     }
     
     const budgetStatus = rpcResult as any;

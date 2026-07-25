@@ -32,8 +32,8 @@ export class InputPresenter extends BaseNodePresenter {
         <label className="text-[10px] font-medium text-[#aaaaaa]">Prompt Manual</label>
         <textarea
           disabled={!this.store?.capabilities?.canEditCanvas}
-          className="nodrag w-full h-16 rounded-[4px] bg-[#1e1e1e] border border-[#333333] p-2 text-xs text-[#f0f0f0] placeholder-[#555555] focus:outline-none focus:border-[#4ea8de] resize-none disabled:opacity-60 disabled:cursor-not-allowed"
-          placeholder="Ketik ide video di sini..."
+          className="nodrag w-full h-16 rounded-[6px] bg-black/40 border border-zinc-700/50 p-2.5 text-xs text-zinc-100 placeholder-zinc-500 shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 resize-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          placeholder="Type video idea here..."
           value={this.data.config?.prompt || ""}
           onChange={(e) => this.updateConfig({ prompt: e.target.value })}
         />
@@ -152,19 +152,19 @@ export class ActorPresenter extends BaseNodePresenter {
         {/* Actor Prompt */}
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <label className="text-[10px] font-medium text-[#8c8c8c]">Prompt Karakter (opsional)</label>
+            <label className="text-[10px] font-medium text-[#8c8c8c]">Character Prompt (optional)</label>
             {this.store?.capabilities?.canEditCanvas && (
               <label className="flex items-center gap-1 text-[9px] text-[#18a0fb] hover:text-[#0d8be8] transition-colors cursor-pointer font-medium">
                 <Upload size={9} />
-                Upload Foto
+                Upload Photo
                 <input type="file" accept="image/*" className="hidden" disabled={!this.store?.capabilities?.canEditCanvas} onChange={handleUpload} />
               </label>
             )}
           </div>
           <textarea
             disabled={!this.store?.capabilities?.canEditCanvas}
-            className="nodrag w-full h-12 rounded-[4px] bg-[#1e1e1e] border border-[#333333] p-1.5 text-[10px] text-[#f0f0f0] placeholder-[#555555] focus:outline-none focus:border-blue-500 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
-            placeholder='misal: "Detektif penjelajah waktu dengan mantel parit..."'
+            className="nodrag w-full h-12 rounded-[6px] bg-black/40 border border-zinc-700/50 p-2 text-[10px] text-zinc-100 placeholder-zinc-500 shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder='e.g. "Time-traveling detective with a trench coat..."'
             value={actorPrompt}
             onChange={(e) => this.updateConfig({ actor_prompt: e.target.value })}
           />
@@ -211,10 +211,10 @@ export class VideoPresenter extends BaseNodePresenter {
                 e.stopPropagation();
                 window.open(`/player?url=${encodeURIComponent(url)}&title=${encodeURIComponent(this.getMediaTitle())}`, "_blank");
               }}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[6px] bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500 text-white text-[11px] font-bold shadow-md shadow-red-500/20 transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[6px] bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500 text-white text-[11px] font-bold shadow-md shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
             >
               <ExternalLink size={13} />
-              🎬 Putar di Cinema Player
+              🎬 Play in Cinema Player
             </button>
           </div>
         )}
@@ -233,10 +233,10 @@ export class TelegramPresenter extends BaseNodePresenter {
 
   public renderBody(): React.ReactNode {
     return (
-      <div className="rounded-[4px] bg-cyan-500/10 border border-cyan-500/30 p-2 space-y-1">
+      <div className="rounded-[6px] bg-cyan-500/10 border border-cyan-500/30 p-2.5 space-y-1 shadow-inner shadow-cyan-500/5">
         <p className="text-[10px] text-cyan-400 font-medium">Telegram Node</p>
         <p className="text-[9px] text-[#8c8c8c]">
-          Menerima output dari node sebelumnya dan mengirimkannya ke chat Telegram yang terdaftar di Settings.
+          Receives output from the previous node and sends it to the Telegram chat registered in Settings.
         </p>
       </div>
     );
@@ -253,10 +253,10 @@ export class TelegramTriggerPresenter extends BaseNodePresenter {
 
   public renderBody(): React.ReactNode {
     return (
-      <div className="rounded-[4px] bg-teal-500/10 border border-teal-500/30 p-2 space-y-1">
+      <div className="rounded-[6px] bg-teal-500/10 border border-teal-500/30 p-2.5 space-y-1 shadow-inner shadow-teal-500/5">
         <p className="text-[10px] text-teal-400 font-medium">Telegram Trigger</p>
         <p className="text-[9px] text-[#8c8c8c]">
-          Menunggu prompt dikirimkan melalui Telegram Bot Anda (mode full_telegram).
+          Waits for a prompt to be sent via your Telegram Bot (full_telegram mode).
         </p>
       </div>
     );
@@ -279,7 +279,7 @@ export class CloudPresenter extends BaseNodePresenter {
     return (
       <div className="space-y-1.5 pt-1">
         <label className="text-[10px] font-medium text-sky-400 flex items-center gap-1">
-          <CheckCircle2 size={11} /> Media Tersimpan di Cloud R2
+          <CheckCircle2 size={11} /> Media Saved in Cloud R2
         </label>
         <button
           type="button"
@@ -292,10 +292,10 @@ export class CloudPresenter extends BaseNodePresenter {
               window.open(url, "_blank");
             }
           }}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-[6px] bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-[11px] font-semibold shadow-md shadow-sky-500/20 transition-all transform active:scale-[0.98] cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-[6px] bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-[11px] font-bold shadow-md shadow-sky-500/20 hover:shadow-sky-500/40 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
         >
           <ExternalLink size={13} />
-          {isMedia ? "🎬 Putar di Cinema Player" : "Buka Link Media"}
+          {isMedia ? "🎬 Play in Cinema Player" : "Open Media Link"}
         </button>
       </div>
     );

@@ -16,7 +16,7 @@ export default function ShareResolvePage() {
 
       if (!session) {
         // Redirect to login preserving destination
-        router.push(`/?redirect=/studio/share/${params.token}`);
+        router.push(`/login?redirect=/studio/share/${params.token}`);
         return;
       }
 
@@ -32,13 +32,13 @@ export default function ShareResolvePage() {
 
         const data = await response.json();
         if (!response.ok) {
-          setError(data.error || "Tautan tidak valid atau telah dicabut.");
+          setError(data.error || "Invalid or revoked collaboration link.");
           return;
         }
 
         router.push(`/studio/${data.studioId}`);
       } catch (err: any) {
-        setError("Gagal memverifikasi tautan kolaborasi.");
+        setError("Failed to verify collaboration link.");
       }
     };
 
@@ -54,13 +54,13 @@ export default function ShareResolvePage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 text-red-400">
             <ShieldAlert size={26} />
           </div>
-          <h2 className="mb-2 text-lg font-semibold text-white">Akses Ditolak</h2>
+          <h2 className="mb-2 text-lg font-semibold text-white">Access Denied</h2>
           <p className="mb-6 text-sm text-zinc-400">{error}</p>
           <button
             onClick={() => router.push("/dashboard")}
             className="w-full rounded-xl bg-zinc-800 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700"
           >
-            Kembali ke Dasbor
+            Back to Dashboard
           </button>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function ShareResolvePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#121212] p-4 text-white font-sans">
       <Loader2 size={36} className="mb-4 animate-spin text-indigo-500" />
-      <p className="text-sm font-medium text-zinc-400">Memverifikasi tautan kolaborasi studio...</p>
+      <p className="text-sm font-medium text-zinc-400">Verifying studio collaboration link...</p>
     </div>
   );
 }

@@ -150,11 +150,11 @@ export const useStudioStore = create<StudioState>((set, get) => {
         const errorMsg = errData.error || "Failed to start pipeline engine";
         console.error("Failed to start pipeline engine:", errorMsg);
         if (typeof window !== "undefined") {
-          toast.error("Gagal Menjalankan Pipeline", errorMsg);
+          toast.error("Failed to Run Pipeline", errorMsg);
         }
       } else {
         if (typeof window !== "undefined") {
-          toast.success("Pipeline Started", "Tim agen AI sedang mengeksekusi pipeline Anda di server.");
+          toast.success("Pipeline Started", "The AI agent team is executing your pipeline on the server.");
         }
         // Start robust active polling loop for live UI feedback (n8n-style progress)
         let pollTicks = 0;

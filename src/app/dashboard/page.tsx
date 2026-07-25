@@ -70,7 +70,7 @@ export default function DashboardPage() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push("/");
+        router.push("/login");
       } else {
         setIsLoadingAuth(false);
         fetchStudios();
@@ -81,7 +81,7 @@ export default function DashboardPage() {
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || !session) {
-        router.push("/");
+        router.push("/login");
       }
     });
     

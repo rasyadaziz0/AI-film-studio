@@ -53,7 +53,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
 
       const result = await res.json();
       if (!res.ok || result.error) {
-        toast.error("Gagal Menyimpan", result.error || "Gagal menyimpan konfigurasi Telegram.");
+        toast.error("Save Failed", result.error || "Failed to save Telegram configuration.");
         setIsSaving(false);
         return; // Don't close modal, let user fix it
       }
@@ -65,12 +65,12 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
       });
 
       toast.success(
-        "Tersimpan!", 
-        telegramMode !== "none" ? "Cek Telegram Anda untuk pesan konfirmasi." : "Integrasi Telegram dinonaktifkan."
+        "Saved!", 
+        telegramMode !== "none" ? "Check your Telegram for a confirmation message." : "Telegram integration disabled."
       );
     } catch (err) {
       console.error("[TelegramConfig] Save failed:", err);
-      toast.error("Kesalahan Sistem", "Terjadi kesalahan saat menyimpan pengaturan Telegram.");
+      toast.error("System Error", "An error occurred while saving Telegram settings.");
       setIsSaving(false);
       return;
     } finally {
@@ -155,7 +155,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">Telegram Integration</h2>
-            <p className="text-xs text-zinc-400">Hubungkan studio ini dengan Bot Telegram.</p>
+            <p className="text-xs text-zinc-400">Connect this studio with a Telegram Bot.</p>
           </div>
           <button onClick={onClose} className="ml-auto text-zinc-400 hover:text-white">
             <X size={20} />
@@ -165,7 +165,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
         <div className="space-y-5">
           {/* Bot Token */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Bot Token (dari BotFather)</label>
+            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Bot Token (from BotFather)</label>
             <input 
               type="password" 
               value={botToken}
@@ -173,7 +173,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
               className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
               placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
             />
-            <p className="text-[11px] text-zinc-500">Token disimpan rahasia. Jangan bagikan token ini.</p>
+            <p className="text-[11px] text-zinc-500">Token is kept secret. Do not share this token.</p>
           </div>
 
           {/* Chat ID */}
@@ -186,7 +186,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
               className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
               placeholder="-1001234567890"
             />
-            <p className="text-[11px] text-zinc-500">Hanya melayani request atau kirim ke Chat ID ini untuk proteksi biaya.</p>
+            <p className="text-[11px] text-zinc-500">Only serves requests or sends outputs to this Chat ID for cost protection.</p>
           </div>
 
           {/* Mode */}
@@ -202,7 +202,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
                 <input type="radio" name="telegram_mode" value="output_only" checked={telegramMode === "output_only"} onChange={() => setTelegramMode("output_only")} className="mt-0.5 hidden" />
                 <div>
                   <div className="text-sm font-medium text-white">Output Only</div>
-                  <div className="text-xs text-zinc-400">Trigger dari Web, hasil video otomatis terkirim ke Telegram.</div>
+                  <div className="text-xs text-zinc-400">Trigger from Web, final video automatically sent to Telegram.</div>
                 </div>
               </label>
               
@@ -210,7 +210,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
                 <input type="radio" name="telegram_mode" value="full_telegram" checked={telegramMode === "full_telegram"} onChange={() => setTelegramMode("full_telegram")} className="mt-0.5 hidden" />
                 <div>
                   <div className="text-sm font-medium text-white">Full Telegram (Bot)</div>
-                  <div className="text-xs text-zinc-400">Kirim prompt dari Telegram -&gt; Studio render di background -&gt; Kirim hasil balik ke Telegram.</div>
+                  <div className="text-xs text-zinc-400">Send prompts via Telegram -&gt; Studio renders in background -&gt; Video sent back to Telegram.</div>
                 </div>
               </label>
             </div>

@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     if (upsertErr) {
       console.error("[ShareResolve] Upsert failed:", upsertErr);
-      return NextResponse.json({ error: "Gagal mencatatkan akses sementara. Silakan jalankan script fase_c_collaboration.sql terbaru di Supabase." }, { status: 500 });
+      return NextResponse.json({ error: "Failed to record temporary access. Please run the latest fase_c_collaboration.sql script in Supabase." }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, studioId: studio.id, role: "viewer" });

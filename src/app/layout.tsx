@@ -10,8 +10,21 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI Film Studio",
-  description: "Visual scripting workspace for AI film production",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_API_BASE_URL || "https://ai-film-studio-zeta.vercel.app"),
+  title: "AI Film Studio | Visual Scripting for AI Video Generation",
+  description: "A powerful node-based visual workspace for producing AI films. Create, iterate, and orchestrate AI Agents (Qwen & Wan Video) to automatically generate videos based on your niche.",
+  openGraph: {
+    title: "AI Film Studio",
+    description: "Visual scripting workspace for AI film production. Fully autonomous and manual modes.",
+    images: ["/og-image.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Film Studio",
+    description: "Visual scripting workspace for AI film production.",
+    images: ["/og-image.png"],
+  }
 };
 
 export default function RootLayout({

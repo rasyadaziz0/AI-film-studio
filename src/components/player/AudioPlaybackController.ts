@@ -49,7 +49,7 @@ export class AudioPlaybackController {
       if (p !== undefined) {
         p.catch((err) => {
           if (err.name !== "AbortError") {
-            this.setState((s) => ({ ...s, error: "Gagal memutar audio. Pastikan format didukung atau jaringan stabil." }));
+            this.setState((s) => ({ ...s, error: "Failed to play audio. Make sure the format is supported or network is stable." }));
           }
         });
       }

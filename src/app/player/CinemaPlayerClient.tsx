@@ -119,7 +119,7 @@ function CinemaPlayerContent({ initialUrl = "", initialTitle = "AI Studio Video 
         </div>
         <h1 className="text-xl font-bold">Media URL Tidak Ditemukan</h1>
         <p className="text-sm text-[#8c8c8c] max-w-md">
-          Silakan buka pemutar video ini langsung melalui tombol koneksi Cloud atau Video Generator di dalam AI Film Studio.
+          Please open this video player directly via the Cloud or Video Generator node button inside AI Film Studio.
         </p>
         <button
           type="button"

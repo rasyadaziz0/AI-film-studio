@@ -35,7 +35,12 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
   const colors = presenter.getColors();
 
   return (
-    <div className={`group relative w-[310px] rounded-lg bg-[#2c2c2c] shadow-md transition-all duration-300 border ${presenter.getBorderStyle()}`}>
+    <div 
+      tabIndex={0}
+      role="group"
+      aria-label={`${presenter.getLabel()} Node. Status: ${presenter.getStatus()}`}
+      className={`group relative w-[310px] rounded-xl bg-zinc-900/80 backdrop-blur-md shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 ${presenter.getBorderStyle()}`}
+    >
 
       {/* Node Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-[#444444]">
@@ -82,17 +87,17 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
             <span className="flex items-center gap-1 px-2 py-0.5 text-[8.5px] font-bold tracking-wider uppercase rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm animate-pulse whitespace-nowrap">
               <Loader2 className="animate-spin shrink-0" size={10} />
               {(() => {
-                if (data.type === "reviewer" && data.config?.current_retry) return `Revisi ${data.config.current_retry}/2`;
+                if (data.type === "reviewer" && data.config?.current_retry) return `Revision ${data.config.current_retry}/2`;
                 switch (data.type) {
-                  case "video": return "Render Video (~2m)...";
-                  case "producer": return "Konsep...";
-                  case "writer": return "Menulis Naskah...";
-                  case "reviewer": return "Me-review...";
-                  case "actor": return "Desain Karakter...";
-                  case "tts": return "Merekam Suara...";
-                  case "telegram_trigger": return "Menunggu Prompt...";
-                  case "telegram": return "Mengirim...";
-                  case "cloud": return "Upload...";
+                  case "video": return "Rendering Video (~2m)...";
+                  case "producer": return "Concepting...";
+                  case "writer": return "Writing Script...";
+                  case "reviewer": return "Reviewing...";
+                  case "actor": return "Designing Character...";
+                  case "tts": return "Recording Voice...";
+                  case "telegram_trigger": return "Waiting for Prompt...";
+                  case "telegram": return "Sending...";
+                  case "cloud": return "Uploading...";
                   default: return "Running...";
                 }
               })()}
@@ -101,7 +106,7 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
           {presenter.isQueued() && (
             <span className="flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-sm animate-pulse whitespace-nowrap">
               <Loader2 className="animate-spin shrink-0" size={10} />
-              Antre...
+              Queued...
             </span>
           )}
           {presenter.isDone() && (
@@ -155,9 +160,9 @@ export default function AgentNode({ id, data }: AgentNodeProps) {
           <button
             onClick={() => presenter.handleRun()}
             disabled={presenter.isRunning()}
-            className={`mt-1 flex w-full items-center justify-center gap-1.5 rounded-[4px] py-1.5 text-[11px] font-bold transition-all ${presenter.isRunning()
-                ? "bg-[#1e1e1e] text-[#8c8c8c] cursor-not-allowed border border-[#444444]"
-                : "bg-[#18a0fb] text-white hover:bg-[#0d8be8] border border-transparent"
+            className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-[6px] py-2 text-[11px] font-bold tracking-wide transition-all transform ${presenter.isRunning()
+                ? "bg-zinc-800/80 text-zinc-500 cursor-not-allowed border border-zinc-700/50"
+                : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20 hover:from-blue-400 hover:to-indigo-500 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 border border-transparent"
               }`}
           >
             {presenter.isRunning() ? <Loader2 className="animate-spin" size={12} /> : <Play size={12} fill="currentColor" />}

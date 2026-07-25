@@ -74,12 +74,12 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
     if (!activeStudioId || !capabilities.canManageSharing) return;
     setSharingVisibility(newVisibility);
     await updateStudio({ sharing_visibility: newVisibility }, activeStudioId);
-    toast.success("Pengaturan Dibagikan Diperbarui", `Visibilitas diubah menjadi ${newVisibility === 'link_view' ? 'Publik (Dengan Link)' : 'Pribadi'}.`);
+    toast.success("Sharing Settings Updated", `Visibility changed to ${newVisibility === 'link_view' ? 'Public (With Link)' : 'Private'}.`);
   };
 
   const handleResetLink = async () => {
     if (!activeStudioId || !shareToken || !capabilities.canManageSharing) return;
-    if (!confirm("Reset link akan mencabut semua akses pengguna yang masuk melalui link lama. Lanjutkan?")) return;
+    if (!confirm("Resetting the link will revoke access for all users using the old link. Continue?")) return;
 
     setIsResetting(true);
     try {
@@ -101,10 +101,10 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
       await updateStudio({ share_token: newToken }, activeStudioId);
       setShareToken(newToken);
 
-      toast.success("Link Direset", "Link baru telah dibuat dan semua sesi akses link lama telah dicabut.");
+      toast.success("Link Reset", "A new link has been generated and old sessions have been revoked.");
     } catch (err) {
       console.error("Reset link failed:", err);
-      toast.error("Gagal Reset Link", "Terjadi kesalahan saat mencabut akses lama.");
+      toast.error("Reset Failed", "An error occurred while revoking old access.");
     } finally {
       setIsResetting(false);
     }
@@ -116,7 +116,7 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
     const shareUrl = `${origin}/studio/share/${shareToken}`;
     navigator.clipboard.writeText(shareUrl);
     setIsCopied(true);
-    toast.success("Link Disalin", "Tautan berbagi berhasil disalin ke clipboard.");
+    toast.success("Link Copied", "The sharing link has been copied to your clipboard.");
     setTimeout(() => setIsCopied(false), 2500);
   };
 
@@ -136,18 +136,18 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
         throw error;
       }
 
-      toast.success("Undangan Terkirim", `Kolaborator ${inviteEmail} berhasil ditambahkan sebagai ${inviteRole}.`);
+      toast.success("Invitation Sent", `Collaborator ${inviteEmail} successfully added as ${inviteRole}.`);
       setInviteEmail("");
       fetchCollaborators();
     } catch (err: any) {
       console.error("Invite error:", err);
-      toast.error("Gagal Mengundang", err.message || "Terjadi kesalahan saat menambahkan kolaborator.");
+      toast.error("Invite Failed", err.message || "An error occurred while adding the collaborator.");
     }
   };
 
   const handleRemoveCollaborator = async (collabId: string, email: string) => {
     if (!activeStudioId || !capabilities.canManageSharing) return;
-    if (!confirm(`Hapus akses untuk ${email}?`)) return;
+    if (!confirm(`Remove access for ${email}?`)) return;
 
     try {
       const { error } = await supabase
@@ -156,11 +156,11 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
         .eq("id", collabId);
 
       if (error) throw error;
-      toast.success("Akses Dihapus", `Kolaborator ${email} telah dihapus.`);
+      toast.success("Access Removed", `Collaborator ${email} has been removed.`);
       fetchCollaborators();
     } catch (err: any) {
       console.error("Remove collab error:", err);
-      toast.error("Gagal Menghapus", err.message || "Terjadi kesalahan.");
+      toast.error("Remove Failed", err.message || "An error occurred.");
     }
   };
 
@@ -174,7 +174,7 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
         <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4 bg-zinc-900/50">
           <div className="flex items-center gap-2.5">
             <Users className="h-5 w-5 text-indigo-400" />
-            <h3 className="font-semibold text-zinc-100 text-lg">Kolaborasikan Studio</h3>
+            <h3 className="font-semibold text-zinc-100 text-lg">Collaborate on Studio</h3>
           </div>
           <button
             onClick={onClose}
@@ -196,7 +196,7 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
                 ) : (
                   <Lock className="h-4 w-4 text-zinc-400 shrink-0" />
                 )}
-                <span>Akses via Link Berbagi</span>
+                <span>Access via Sharing Link</span>
               </div>
               <select
                 value={sharingVisibility}
@@ -204,8 +204,8 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
                 disabled={!capabilities.canManageSharing}
                 className="bg-zinc-900 border border-zinc-700 rounded-md text-xs px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-indigo-500 cursor-pointer disabled:opacity-50 sm:max-w-[240px]"
               >
-                <option value="private">Pribadi (Hanya Undangan)</option>
-                <option value="link_view">Siapa saja dengan Link (Lihat Saja)</option>
+                <option value="private">Private (Invite Only)</option>
+                <option value="link_view">Anyone with Link (View Only)</option>
               </select>
             </div>
 
@@ -223,14 +223,14 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
                     className="flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3.5 py-2 text-xs font-medium transition-all shrink-0 cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     {isCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                    {isCopied ? "Disalin" : "Salin Link"}
+                    {isCopied ? "Copied" : "Copy Link"}
                   </button>
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-zinc-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
                   <div className="flex items-center gap-2">
                     <AlertTriangle size={14} className="text-amber-400 shrink-0" />
-                    <span>Sesi ini hanya memberi hak akses <b>Lihat Saja (View-Only)</b> bagi pengguna terotentikasi.</span>
+                    <span>This session only grants <b>View-Only</b> access to authenticated users.</span>
                   </div>
                 </div>
 
@@ -241,7 +241,7 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
                     className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-medium transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw size={12} className={isResetting ? "animate-spin" : ""} />
-                    {isResetting ? "Mencabut Link Lama..." : "Reset Link & Cabut Sesi Lama"}
+                    {isResetting ? "Revoking Old Link..." : "Reset Link & Revoke Old Sessions"}
                   </button>
                 </div>
               </div>
@@ -252,13 +252,13 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-zinc-200 flex items-center gap-2">
               <UserPlus size={16} className="text-indigo-400" />
-              Undang Anggota Tim
+              Invite Team Members
             </h4>
             <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-2 items-stretch">
               <input
                 type="email"
                 required
-                placeholder="email@perusahaan.com"
+                placeholder="email@company.com"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 disabled={!capabilities.canManageSharing}
@@ -271,14 +271,14 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
                 className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs sm:text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 cursor-pointer disabled:opacity-50 shrink-0 w-full sm:w-auto"
               >
                 <option value="editor">Editor (Run & Edit)</option>
-                <option value="viewer">Viewer (Lihat Saja)</option>
+                <option value="viewer">Viewer (View Only)</option>
               </select>
               <button
                 type="submit"
                 disabled={!capabilities.canManageSharing || !inviteEmail}
                 className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg px-4 py-2 text-xs sm:text-sm font-medium transition-colors shrink-0 cursor-pointer shadow-sm shadow-indigo-600/20"
               >
-                Undang
+                Invite
               </button>
             </form>
           </div>
@@ -287,15 +287,15 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-zinc-200 flex items-center gap-2">
               <Shield size={16} className="text-indigo-400" />
-              Daftar Anggota Akses ({collaborators.length})
+              Access Members List ({collaborators.length})
             </h4>
             
             <div className="space-y-2 max-h-48 overflow-y-auto overflow-x-hidden pr-1">
               {isLoading ? (
-                <div className="text-xs text-zinc-500 text-center py-4">Memuat anggota tim...</div>
+                <div className="text-xs text-zinc-500 text-center py-4">Loading team members...</div>
               ) : collaborators.length === 0 ? (
                 <div className="text-xs text-zinc-500 bg-zinc-950/40 border border-zinc-900 rounded-lg p-4 text-center">
-                  Belum ada kolaborator yang diundang langsung.
+                  No collaborators invited directly yet.
                 </div>
               ) : (
                 collaborators.map((collab) => (
@@ -321,7 +321,7 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
                         <button
                           onClick={() => handleRemoveCollaborator(collab.id, collab.user_email)}
                           className="text-zinc-500 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                          title="Hapus Kolaborator"
+                          title="Remove Collaborator"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -341,7 +341,7 @@ export default function CollaborationShareModal({ isOpen, onClose }: Collaborati
             onClick={onClose}
             className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg px-5 py-2 text-sm font-medium transition-colors cursor-pointer"
           >
-            Tutup
+            Close
           </button>
         </div>
 

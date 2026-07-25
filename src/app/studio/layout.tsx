@@ -28,7 +28,7 @@ export default function StudioLayout({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         const returnUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/dashboard";
-        router.push(`/?redirect=${encodeURIComponent(returnUrl)}`);
+        router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       } else {
         setIsLoadingAuth(false);
       }
@@ -38,7 +38,7 @@ export default function StudioLayout({
     
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || !session) {
-        router.push("/");
+        router.push("/login");
       }
     });
     
@@ -138,7 +138,7 @@ export default function StudioLayout({
               {isPipelineRunning ? (
                 <>
                   <Loader2 size={14} className="animate-spin shrink-0" />
-                  Pipeline Berjalan...
+                  Pipeline Running...
                 </>
               ) : (
                 <>
@@ -165,7 +165,7 @@ export default function StudioLayout({
                 });
                 await useStudioStore.getState().pollStatus();
               }}
-              title="Berhentikan atau Reset status pipeline yang menyangkut"
+              title="Stop or Reset stuck pipeline status"
               className="flex items-center gap-1.5 rounded-lg bg-red-600/90 hover:bg-red-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors shadow-sm"
             >
               <Square size={12} fill="currentColor" />
@@ -178,10 +178,10 @@ export default function StudioLayout({
           <button
             onClick={() => setIsShareModalOpen(true)}
             className="flex items-center gap-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors border border-zinc-700/80"
-            title="Bagikan & Kolaborasikan Studio"
+            title="Share & Collaborate on Studio"
           >
             <Users size={14} className="text-indigo-400" />
-            <span>Bagikan</span>
+            <span>Share</span>
           </button>
 
           <button 
@@ -198,10 +198,10 @@ export default function StudioLayout({
       {activeStudio && (
         <div className="flex h-12 shrink-0 items-center gap-4 border-b border-zinc-800 bg-zinc-900/90 px-4 shadow-sm z-10">
           <div className="flex-1 flex items-center gap-3">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Niche / Topik</span>
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Niche / Topic</span>
             <input
               type="text"
-              placeholder="e.g. T-Rex pecinta kalkulus (mematikan mode manual)"
+              placeholder="e.g. T-Rex who loves calculus (disables manual mode)"
               value={activeStudio.niche || ""}
               onChange={(e) => updateStudio({ niche: e.target.value })}
               disabled={!capabilities.canEditCanvas}
@@ -210,10 +210,10 @@ export default function StudioLayout({
           </div>
           <div className="w-px h-6 bg-zinc-800"></div>
           <div className="flex-[0.7] flex items-center gap-3">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Judul Video</span>
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Video Title</span>
             <input
               type="text"
-              placeholder="Auto-generated atau ketik sendiri..."
+              placeholder="Auto-generated or type your own..."
               value={activeStudio.name || ""}
               onChange={(e) => updateStudio({ name: e.target.value })}
               disabled={!capabilities.canEditCanvas}
@@ -222,21 +222,21 @@ export default function StudioLayout({
           </div>
           <div className="w-px h-6 bg-zinc-800"></div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Durasi</span>
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Duration</span>
             <select
               value={activeStudio.video_duration || 5}
               onChange={(e) => updateStudio({ video_duration: parseInt(e.target.value) })}
               disabled={!capabilities.canEditCanvas}
               className="bg-zinc-950 text-sm font-medium text-zinc-200 rounded-md px-3 py-1.5 outline-none focus:border-indigo-500 border border-zinc-800 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <option value={5}>5 Detik</option>
-              <option value={15}>15 Detik</option>
-              <option value={30}>30 Detik</option>
+              <option value={5}>5 Seconds</option>
+              <option value={15}>15 Seconds</option>
+              <option value={30}>30 Seconds</option>
             </select>
           </div>
           <div className="w-px h-6 bg-zinc-800"></div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Bahasa</span>
+            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Language</span>
             <select
               value={activeStudio.language || "English"}
               onChange={(e) => updateStudio({ language: e.target.value })}

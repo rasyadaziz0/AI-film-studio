@@ -18,7 +18,7 @@ export async function clientDirectDownload(url: string, suggestedFilename?: stri
   }
 
   try {
-    toast.info("Memulai Unduhan", "Sedang mengambil berkas dari Cloud Edge Server...");
+    toast.info("Starting Download", "Fetching file from Cloud Edge Server...");
 
     const response = await fetch(url, { mode: "cors" });
     if (!response.ok) {
@@ -38,7 +38,7 @@ export async function clientDirectDownload(url: string, suggestedFilename?: stri
 
     window.URL.revokeObjectURL(blobUrl);
 
-    toast.success("Unduhan Berhasil", `Berkas ${filename} telah tersimpan di perangkat Anda.`);
+    toast.success("Download Successful", `File ${filename} has been saved to your device.`);
     return true;
   } catch (error) {
     console.warn("[Download] Client blob fetch blocked by CORS, switching to attachment download:", error);
@@ -54,7 +54,7 @@ export async function clientDirectDownload(url: string, suggestedFilename?: stri
       a.click();
       document.body.removeChild(a);
 
-      toast.success("Unduhan Berhasil", `Berkas ${filename} sedang diunduh ke perangkat Anda.`);
+      toast.success("Download Successful", `File ${filename} is downloading to your device.`);
       return true;
     } catch (fallbackError) {
       console.error("[Download] Proxy fallback failed:", fallbackError);
