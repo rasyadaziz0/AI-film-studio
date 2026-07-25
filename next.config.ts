@@ -6,10 +6,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        // Proxy all /backend/ requests directly to the VPS IP
-        // This bypasses Alibaba Cloud WAF domain blocking completely!
+        // Proxy all /backend/ requests directly to the VPS domain
+        // This avoids WAF blocking raw IP hits from AWS to port 4000
         source: "/backend/:path*",
-        destination: "http://47.99.193.142:4000/:path*",
+        destination: "https://api.acadlabs.fun/:path*", // Proxy to the secure HTTPS API
       },
     ];
   },
