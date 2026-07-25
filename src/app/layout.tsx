@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_API_BASE_URL || "https://ai-film-studio-zeta.vercel.app"),
+  metadataBase: new URL((process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || "https://ai-film-studio-zeta.vercel.app"),
   title: "AI Film Studio | Visual Scripting for AI Video Generation",
   description: "A powerful node-based visual workspace for producing AI films. Create, iterate, and orchestrate AI Agents (Qwen & Wan Video) to automatically generate videos based on your niche.",
   openGraph: {

@@ -153,7 +153,7 @@ export default function StudioLayout({
             <button
               onClick={async () => {
                 if (!activeStudioId) return;
-                const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+                const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
                 const { data: { session } } = await supabase.auth.getSession();
                 await fetch(`${apiUrl}/v1/jobs/reset`, {
                   method: "POST",

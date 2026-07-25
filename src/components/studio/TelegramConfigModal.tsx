@@ -35,7 +35,7 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
       // Save secrets via ECS API (encrypted server-side)
       const { supabase } = await import("@/lib/supabase");
       const { data: { session } } = await supabase.auth.getSession();
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
 
       const res = await fetch(`${apiUrl}/v1/studios/secrets`, {
         method: "POST",
