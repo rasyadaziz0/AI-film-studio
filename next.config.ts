@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
         // Proxy all /backend/ requests directly to the VPS IP
         // This bypasses Alibaba Cloud WAF domain blocking completely!
         source: "/backend/:path*",
-        destination: "http://47.99.193.142:80/:path*",
+        destination: "http://47.99.193.142:4000/:path*",
       },
     ];
   },

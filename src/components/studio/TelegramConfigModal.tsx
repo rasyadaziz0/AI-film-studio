@@ -51,7 +51,21 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
         }),
       });
 
-      const result = await res.json();
+      let result;
+      try {
+        const textResponse = await res.text();
+        try {
+          result = JSON.parse(textResponse);
+        } catch (e) {
+          throw new Error(`Server returned non-JSON response (${res.status}): ${textResponse.substring(0, 100)}...`);
+        }
+      } catch (err: any) {
+        console.error("[TelegramConfig] Response parsing failed:", err);
+        toast.error("Save Failed", err.message || "Failed to communicate with the server.");
+        setIsSaving(false);
+        return;
+      }
+
       if (!res.ok || result.error) {
         toast.error("Save Failed", result.error || "Failed to save Telegram configuration.");
         setIsSaving(false);
@@ -219,8 +233,8 @@ export default function TelegramConfigModal({ isOpen, onClose }: TelegramConfigM
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
             <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors">Cancel</button>
-            <button onClick={handleSave} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20">
-              Save Settings
+            <button onClick={handleSave} disabled={isSaving} className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSaving ? "Saving..." : "Save Settings"}
             </button>
           </div>
         </div>
