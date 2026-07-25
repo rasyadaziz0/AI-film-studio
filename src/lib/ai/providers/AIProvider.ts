@@ -1,6 +1,8 @@
 export interface GenerateOptions {
   maxTokens?: number;
   enableThinking?: boolean;
+  jobId?: string;
+  studioId?: string;
 }
 
 export abstract class AIProvider {

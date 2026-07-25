@@ -35,11 +35,22 @@ export class CloudflareR2 {
     const timestamp = Date.now();
     const urlPath = new URL(sourceUrl).pathname;
     const pathExt = urlPath.split(".").pop()?.toLowerCase();
-    const extension = (pathExt === "png" || pathExt === "jpg" || pathExt === "jpeg") ? "png"
-      : (pathExt === "mp3" || pathExt === "wav") ? "mp3"
-      : (pathExt === "mp4" || pathExt === "webm") ? "mp4"
-      : "bin";
+    // Preserve correct extension — don't mislabel jpg as png or wav as mp3
+    const extensionMap: Record<string, string> = {
+      png: "png", jpg: "jpg", jpeg: "jpg",
+      mp3: "mp3", wav: "wav",
+      mp4: "mp4", webm: "webm",
+    };
+    const extension = (pathExt && extensionMap[pathExt]) || "bin";
     const key = `${filePrefix}/${timestamp}_output.${extension}`;
+
+    // Content-type map must match actual extension
+    const contentTypeMap: Record<string, string> = {
+      png: "image/png", jpg: "image/jpeg",
+      mp3: "audio/mpeg", wav: "audio/wav",
+      mp4: "video/mp4", webm: "video/webm",
+      bin: "application/octet-stream",
+    };
 
     // Check if sourceUrl is ALREADY on our R2 storage network
     if (publicDomain && (sourceUrl.startsWith(publicDomain) || sourceUrl.includes(".r2.dev/"))) {
@@ -55,13 +66,13 @@ export class CloudflareR2 {
     }
 
     let buffer: Buffer;
-    let contentType = extension === "mp4" ? "video/mp4" : extension === "png" ? "image/png" : extension === "mp3" ? "audio/mpeg" : "application/octet-stream";
+    let contentType = contentTypeMap[extension] || "application/octet-stream";
 
     try {
       buffer = await this.downloadBuffer(sourceUrl);
     } catch (e: any) {
       console.warn(`[CloudflareR2] Could not download remote source (${sourceUrl}): ${e.message}`);
-      if (process.env.USE_MOCK_MEDIA === "true" || sourceUrl.includes("w3schools")) {
+      if (process.env.USE_MOCK_MEDIA === "true") {
         console.warn(`[CloudflareR2] Using fallback sample buffer for ${sourceUrl}`);
         buffer = Buffer.from("AI Studio Media Output Sample Content");
       } else {

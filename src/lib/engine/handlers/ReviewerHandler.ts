@@ -8,7 +8,7 @@ export class ReviewerHandler extends BaseNodeHandler {
     const { node, nodeId, finalUserInput, upstreamContext, nodeModel, supabase, retryCount, runNodeCallback, upstreamNodes } = context;
 
     const maxRetries = node.config?.max_retries || 2;
-    const result = await executeNodeRequest(node.type as AgentType, finalUserInput, upstreamContext, "qwen", nodeModel, { targetLanguage: context.language });
+    const result = await executeNodeRequest(node.type as AgentType, finalUserInput, upstreamContext, "qwen", nodeModel, { targetLanguage: context.language, jobId: context.jobId, studioId: context.studioId });
     
     try {
       let cleanJson = result.trim();

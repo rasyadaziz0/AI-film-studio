@@ -29,8 +29,8 @@ export const AIModelConfigurator: React.FC<AIModelConfiguratorProps> = ({ presen
           <SelectItem value="default" className="focus:bg-[#18a0fb] focus:text-white">
             Default (qwen-plus ⚖️ Balanced)
           </SelectItem>
-          <SelectItem value="qwen3.5-flash" className="focus:bg-[#18a0fb] focus:text-white">
-            qwen3.5-flash ⚡ Fast &amp; Cheap
+          <SelectItem value="qwen-flash" className="focus:bg-[#18a0fb] focus:text-white">
+            qwen-flash ⚡ Fast &amp; Cheap
           </SelectItem>
           <SelectItem value="qwen-plus" className="focus:bg-[#18a0fb] focus:text-white">
             qwen-plus ⚖️ Balanced

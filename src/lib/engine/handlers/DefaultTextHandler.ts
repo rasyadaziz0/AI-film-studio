@@ -13,7 +13,7 @@ export class DefaultTextHandler extends BaseNodeHandler {
       upstreamContext, 
       "qwen", 
       nodeModel,
-      { targetLanguage: context.language, videoDuration: context.videoDuration }
+      { targetLanguage: context.language, videoDuration: context.videoDuration, jobId: context.jobId, studioId: context.studioId }
     );
 
     return result;

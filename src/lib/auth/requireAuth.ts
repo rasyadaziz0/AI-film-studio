@@ -40,17 +40,13 @@ export async function requireAuth(req: Request): Promise<{ user: User; supabase:
  */
 export function getServiceSupabase(userToken?: string): SupabaseClient {
   const url = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!;
-  const anonKey = (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (serviceKey) {
     return createClient(url, serviceKey);
   }
-  if (userToken) {
-    return createClient(url, anonKey, {
-      global: { headers: { Authorization: `Bearer ${userToken}` } },
-    });
-  }
-  return createClient(url, anonKey);
+  
+  // Unconditionally require the service role key to prevent silent RLS bypass failures
+  throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set. Cannot create service client.");
 }
 
 /**
@@ -149,7 +145,10 @@ export async function resolveStudioAccess(
     .eq("studio_id", studioId);
 
   if (userEmail) {
-    collabQuery.or(`user_id.eq.${userId},user_email.eq.${userEmail}`);
+    // Quote values to prevent PostgREST filter injection via special characters in email
+    const safeUserId = userId.replace(/"/g, '""');
+    const safeEmail = userEmail.replace(/"/g, '""');
+    collabQuery.or(`user_id.eq."${safeUserId}",user_email.eq."${safeEmail}"`);
   } else {
     collabQuery.eq("user_id", userId);
   }

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       .from("studio_collaborators")
       .select("role")
       .eq("studio_id", studio.id)
-      .or(`user_id.eq.${user.id},user_email.eq.${user.email || ""}`)
+      .or(`user_id.eq."${user.id}",user_email.eq."${user.email || ""}"`)
       .maybeSingle();
 
     if (collab) {

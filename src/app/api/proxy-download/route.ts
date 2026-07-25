@@ -97,12 +97,13 @@ export async function GET(req: NextRequest) {
 
     const contentType = response.headers.get("content-type") || "application/octet-stream";
     const body = response.body;
+    const safeFilename = filename.replace(/["\r\n]/g, "");
 
     return new NextResponse(body, {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `attachment; filename="${safeFilename}"`,
         "Cache-Control": "public, max-age=3600",
       },
     });

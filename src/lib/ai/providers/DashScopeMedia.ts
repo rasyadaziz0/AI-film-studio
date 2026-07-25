@@ -7,7 +7,7 @@ export class DashScopeMedia {
   }
 
   // 1. Image Generation (qwen-image-plus) -> Async task but we can poll immediately until done (usually 5-10s)
-  static async generateImage(prompt: string): Promise<string> {
+  static async generateImage(prompt: string, options?: { jobId?: string; studioId?: string }): Promise<string> {
     if (process.env.USE_MOCK_MEDIA === "true") {
       console.log(`[DashScopeMedia] MOCK MODE: Generating mock image for prompt: "${prompt}"`);
       await new Promise(r => setTimeout(r, 2000));
@@ -35,7 +35,11 @@ export class DashScopeMedia {
     if (data.code && data.code !== "200") throw new Error(data.message);
 
     const taskId = data.output.task_id;
-    return this.pollImageTask(taskId);
+    const result = await this.pollImageTask(taskId);
+    if (options?.jobId && options?.studioId) {
+      await this.logMediaUsage(options.studioId, options.jobId, "qwen-image-plus", 0.05); // 0.05 USD
+    }
+    return result;
   }
 
   private static async pollImageTask(taskId: string): Promise<string> {
@@ -68,7 +72,7 @@ export class DashScopeMedia {
   }
 
   // 2. TTS (Sambert / CosyVoice / Qwen3-TTS) -> Synchronous streaming or URL return depending on model
-  static async generateAudio(text: string, language?: string): Promise<string> {
+  static async generateAudio(text: string, language?: string, options?: { jobId?: string; studioId?: string }): Promise<string> {
     if (process.env.USE_MOCK_MEDIA === "true") {
       console.log(`[DashScopeMedia] MOCK MODE: Generating mock audio for text: "${text}"`);
       await new Promise(r => setTimeout(r, 2000));
@@ -144,6 +148,10 @@ export class DashScopeMedia {
             throw new Error(`[${cfg.model}] No audio URL returned in synchronous response.`);
           }
           console.log(`[DashScopeMedia] Synchronous TTS generated successfully: ${audioUrl}`);
+          if (options?.jobId && options?.studioId) {
+            // approx 5,000 microUSD for 1 audio snippet
+            await this.logMediaUsage(options.studioId, options.jobId, cfg.model, 0.005); 
+          }
           return audioUrl;
         }
       } catch (e: any) {
@@ -185,7 +193,7 @@ export class DashScopeMedia {
   }
 
   // 3. Wan 2.7 Video Generation -> Polls directly until finished (v7 Hybrid Architecture)
-  static async generateVideo(prompt: string, imageUrl?: string): Promise<string> {
+  static async generateVideo(prompt: string, imageUrl?: string, options?: { jobId?: string; studioId?: string }): Promise<string> {
     if (process.env.USE_MOCK_MEDIA === "true") {
       console.log(`[DashScopeMedia] MOCK MODE: Generating mock video for prompt: "${prompt}"`);
       await new Promise(r => setTimeout(r, 3000));
@@ -200,18 +208,22 @@ export class DashScopeMedia {
     // but polling timed out, throw immediately to prevent double-charge.
     if (imageUrl) {
       try {
-        return await this.submitVideoTask(key, "wan2.7-i2v", prompt, imageUrl);
-      } catch (e: any) {
-        // ONLY fallback if it was explicitly an initial Submission Error (e.g. invalid image format or 400 Bad Request).
-        // If a task was already submitted (polling error, timeout, or network issue after submission), NEVER fallback!
-        if (!e.message?.includes('Submission Error')) {
-          throw e; // Re-throw: task was already submitted or network failed, DO NOT double-charge!
+        const url = await this.submitVideoTask(key, "wan2.7-i2v", prompt, imageUrl);
+        if (options?.jobId && options?.studioId) {
+           await this.logMediaUsage(options.studioId, options.jobId, "wan2.7-i2v", 0.50); // $0.50
         }
+        return url;
+      } catch (e: any) {
+        if (!e.message?.includes('Submission Error')) throw e;
         console.warn(`[DashScopeMedia] wan2.7-i2v submission failed (${e.message}), falling back to wan2.7-t2v without image`);
       }
     }
     
-    return await this.submitVideoTask(key, "wan2.7-t2v", prompt);
+    const url = await this.submitVideoTask(key, "wan2.7-t2v", prompt);
+    if (options?.jobId && options?.studioId) {
+      await this.logMediaUsage(options.studioId, options.jobId, "wan2.7-t2v", 0.50);
+    }
+    return url;
   }
 
   private static async submitVideoTask(key: string, model: string, prompt: string, imageUrl?: string): Promise<string> {
@@ -285,5 +297,21 @@ export class DashScopeMedia {
       }
     }
     throw new Error(`[Task ${taskId} timeout] Video generation timeout after 10 minutes`);
+  }
+
+  private static async logMediaUsage(studioId: string, jobId: string, model: string, costUsd: number) {
+    try {
+      const { getServiceSupabase } = await import("../../auth/requireAuth");
+      const supabase = getServiceSupabase();
+      await supabase.from("ai_usage").insert({
+        studio_id: studioId || null,
+        job_id: jobId || null,
+        node_id: null,
+        model,
+        estimated_cost: costUsd
+      });
+    } catch (e: any) {
+      console.error("[DashScopeMedia] Failed to log media usage:", e.message);
+    }
   }
 }

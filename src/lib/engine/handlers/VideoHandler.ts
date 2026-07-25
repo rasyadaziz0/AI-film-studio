@@ -20,7 +20,7 @@ export class VideoHandler extends BaseNodeHandler {
 
     if (clipCount <= 1) {
       // === Single clip (5s default) ===
-      const videoUrl = await DashScopeMedia.generateVideo(upstreamContext, actorNode?.output_url);
+      const videoUrl = await DashScopeMedia.generateVideo(upstreamContext, actorNode?.output_url, { jobId: context.jobId, studioId: context.studioId });
       
       if (ttsNode?.output_url) {
         console.log(`[ServerEngine] 🎙️ Upstream TTS audio found! Muxing audio locally into video...`);
@@ -66,7 +66,7 @@ export class VideoHandler extends BaseNodeHandler {
           }
         }
 
-        const clipUrl = await DashScopeMedia.generateVideo(scenePrompts[i], imageRef);
+        const clipUrl = await DashScopeMedia.generateVideo(scenePrompts[i], imageRef, { jobId: context.jobId, studioId: context.studioId });
         clipUrls.push(clipUrl);
         console.log(`[ServerEngine] ✅ Clip ${i + 1}/${scenePrompts.length} done!`);
       }
@@ -165,7 +165,7 @@ export class VideoHandler extends BaseNodeHandler {
         "",
         "qwen",
         context.nodeModel,
-        { targetLanguage: context.language }
+        { targetLanguage: context.language, videoDuration: context.videoDuration, jobId: context.jobId, studioId: context.studioId }
       );
       
       const jsonMatch = result.match(/\[[\s\S]*\]/);

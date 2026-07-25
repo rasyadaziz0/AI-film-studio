@@ -86,61 +86,65 @@ export class TelegramSendHandler extends BaseNodeHandler {
     console.log(`[TelegramSendHandler] Sending ${mediaType} media to Telegram chat ${targetChatId}...`);
 
     try {
-      let apiMethod: string;
-      let bodyPayload: Record<string, any>;
+      let apiMethod = "sendDocument";
+      let caption = "📦 AI Film Studio — Media output ready!";
 
       if (mediaType === "video" || mediaUrl.endsWith(".mp4")) {
         apiMethod = "sendVideo";
-        bodyPayload = {
-          chat_id: targetChatId,
-          video: mediaUrl,
-          caption: "🎥 AI Film Studio — Your video is ready!",
-        };
+        caption = "🎥 AI Film Studio — Your video is ready!";
       } else if (mediaType === "tts" || mediaUrl.endsWith(".mp3") || mediaUrl.endsWith(".wav")) {
         apiMethod = "sendAudio";
-        bodyPayload = {
-          chat_id: targetChatId,
-          audio: mediaUrl,
-          caption: "🎙️ AI Film Studio — Voice over ready!",
-        };
+        caption = "🎙️ AI Film Studio — Voice over ready!";
       } else if (mediaType === "actor" || mediaUrl.endsWith(".png") || mediaUrl.endsWith(".jpg")) {
         apiMethod = "sendPhoto";
-        bodyPayload = {
-          chat_id: targetChatId,
-          photo: mediaUrl,
-          caption: "🎨 AI Film Studio — Character image ready!",
-        };
-      } else {
-        apiMethod = "sendDocument";
-        bodyPayload = {
-          chat_id: targetChatId,
-          document: mediaUrl,
-          caption: "📦 AI Film Studio — Media output ready!",
-        };
+        caption = "🎨 AI Film Studio — Character image ready!";
       }
 
-      const telegramApi = process.env.TELEGRAM_API_URL || "https://api.telegram.org";
-      const relaySecret = process.env.TELEGRAM_RELAY_SECRET;
-      const res = await fetch(`${telegramApi}/bot${botToken}/${apiMethod}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(relaySecret ? { "x-relay-secret": relaySecret } : {}),
-        },
-        body: JSON.stringify(bodyPayload),
-      });
+      // Initialize bot
+      const { TelegramBot } = await import("../../../../ecs/src/lib/telegram/TelegramBot");
+      const bot = new TelegramBot(secrets as any);
 
-      if (!res.ok) {
-        const errBody = await res.text();
-        console.error(`[TelegramSendHandler] Telegram API error (${res.status}):`, errBody);
-        return `❌ Telegram Send failed (HTTP ${res.status}): ${errBody}`;
+      // Attempt 1: Send via URL (Telegram fetches from R2 directly, up to 20MB)
+      try {
+        console.log(`[TelegramSendHandler] Attempt 1: Sending ${mediaType} via URL to chat ${targetChatId}...`);
+        await bot.sendMediaByUrl(targetChatId, apiMethod, mediaUrl, caption);
+        return `✅ Sent to Telegram chat ${targetChatId} via URL`;
+      } catch (urlErr: any) {
+        console.warn(`[TelegramSendHandler] URL send failed, attempting multipart fallback... (${urlErr.message})`);
       }
 
-      console.log(`[TelegramSendHandler] ✅ Successfully sent ${mediaType} to chat ${targetChatId}`);
-      return `✅ Sent to Telegram chat ${targetChatId} via ${apiMethod}`;
+      // Attempt 2: Download to buffer and send via multipart (Bypasses Vercel proxy, direct to API up to 50MB)
+      try {
+        console.log(`[TelegramSendHandler] Attempt 2: Downloading media from ${mediaUrl} for multipart upload...`);
+        const mediaRes = await fetch(mediaUrl);
+        if (!mediaRes.ok) throw new Error(`Failed to download media from R2: ${mediaRes.statusText}`);
+        
+        const mediaBlob = await mediaRes.blob();
+        
+        let filename = "media.mp4";
+        if (apiMethod === "sendVideo") filename = "video.mp4";
+        else if (apiMethod === "sendAudio") filename = "audio.mp3";
+        else if (apiMethod === "sendPhoto") filename = "image.png";
+
+        console.log(`[TelegramSendHandler] Sending multipart data to Telegram...`);
+        await bot.sendMediaMultipart(targetChatId, apiMethod, mediaBlob, filename, caption);
+        return `✅ Sent to Telegram chat ${targetChatId} via Multipart Upload`;
+      } catch (multiErr: any) {
+        console.warn(`[TelegramSendHandler] Multipart send failed, attempting text link fallback... (${multiErr.message})`);
+      }
+
+      // Attempt 3: Send text message with the URL
+      console.log(`[TelegramSendHandler] Attempt 3: Sending text message with link...`);
+      await bot.sendMessage(
+        targetChatId,
+        `⚠️ File terlalu besar untuk dikirim langsung ke Telegram.\n\nUnduh manual di sini:\n${mediaUrl}`
+      );
+      
+      return `✅ Sent text link to Telegram chat ${targetChatId}`;
     } catch (err: any) {
-      console.error("[TelegramSendHandler] Error:", err);
-      return `❌ Telegram Send error: ${err?.message || "Unknown error"}`;
+      console.error("[TelegramSendHandler] Fatal Error:", err);
+      // Hard fail: throw so the node actually enters 'error' state
+      throw new Error(`Telegram Send fatal error: ${err?.message || "Unknown error"}`);
     }
   }
 }

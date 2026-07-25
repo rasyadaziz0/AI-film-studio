@@ -6,14 +6,17 @@ import { JobLifecycleManager } from "./lifecycle/JobLifecycleManager";
 export class ServerEngine {
   private supabase: any;
   private lifecycle: JobLifecycleManager;
+  private isResume: boolean;
 
   constructor(
     private studioId: string,
     private jobId: string,
-    private userToken?: string
+    private userToken?: string,
+    isResume = false
   ) {
     this.supabase = getServiceSupabase(userToken);
     this.lifecycle = new JobLifecycleManager(this.supabase, this.jobId);
+    this.isResume = isResume;
   }
 
   public reserveMediaCall(): number {
@@ -21,10 +24,18 @@ export class ServerEngine {
   }
 
   public async runPipeline() {
-    console.log(`[ServerEngine] Starting pipeline for studio ${this.studioId}, job ${this.jobId}`);
+    console.log(`[ServerEngine] Starting pipeline for studio ${this.studioId}, job ${this.jobId} (isResume=${this.isResume})`);
     await this.lifecycle.updateStatus("running");
 
     try {
+      // On fresh run (not resume), reset all node statuses to idle so nothing is skipped
+      if (!this.isResume) {
+        await this.supabase
+          .from("nodes")
+          .update({ status: "idle" })
+          .eq("studio_id", this.studioId);
+      }
+
       const { data: nodesData, error: nodesErr } = await this.supabase
         .from("nodes")
         .select("id, studio_id, type, label, position_x, position_y, role_prompt, user_input, model, config, output, output_url, status")
@@ -43,6 +54,15 @@ export class ServerEngine {
       const sorted = PipelineGraphScheduler.sort(nodes, edges);
 
       for (const nodeId of sorted) {
+        // On resume, skip nodes that already completed successfully
+        if (this.isResume) {
+          const existing = nodes.find(n => n.id === nodeId);
+          if (existing?.status === "done") {
+            console.log(`[ServerEngine] Skipping node ${nodeId} because it is already done (Resume Mode)`);
+            continue;
+          }
+        }
+
         await this.runNode(nodeId);
 
         const { data: refreshedNode } = await this.supabase

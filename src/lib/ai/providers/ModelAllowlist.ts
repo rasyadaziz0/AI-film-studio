@@ -3,7 +3,7 @@
  * Only these models may be used. Request for any other model → hard 400 error.
  */
 export const ALLOWED_MODELS = new Set([
-  "qwen3.5-flash",   // Fast & cheap — classifier, reviewer, scene splitter
+  "qwen-flash",      // Fast & cheap — classifier, reviewer, scene splitter
   "qwen-plus",       // Balanced — script, storyboard
   "qwen3-max",       // Premium — final/complex generation
 ]);
@@ -14,6 +14,7 @@ export const ALLOWED_MODELS = new Set([
  */
 export function validateModel(model?: string): string {
   if (!model) return "qwen-plus"; // default
+  if (model === "qwen3.5-flash") return "qwen-flash"; // Legacy DB mapping
   if (!ALLOWED_MODELS.has(model)) {
     throw new Error(
       `Model "${model}" is not allowed. Allowed models: ${[...ALLOWED_MODELS].join(", ")}`

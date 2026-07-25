@@ -101,13 +101,13 @@ export interface NodeModelConfig {
 }
 
 export const NODE_MODEL_CONFIG: Record<string, NodeModelConfig> = {
-  input:     { defaultModel: "qwen3.5-flash", maxTokens: 100,  enableThinking: false },
+  input:     { defaultModel: "qwen-flash", maxTokens: 100,  enableThinking: false },
   producer:  { defaultModel: "qwen-plus",     maxTokens: 800,  enableThinking: false },
   writer:    { defaultModel: "qwen-plus",     maxTokens: 1000, enableThinking: false },
-  reviewer:  { defaultModel: "qwen3.5-flash", maxTokens: 256,  enableThinking: false },
-  actor:     { defaultModel: "qwen3.5-flash", maxTokens: 200,  enableThinking: false },
-  tts:       { defaultModel: "qwen3.5-flash", maxTokens: 400,  enableThinking: false },
-  video:     { defaultModel: "qwen3.5-flash", maxTokens: 400,  enableThinking: false },
-  telegram:  { defaultModel: "qwen3.5-flash", maxTokens: 300,  enableThinking: false },
-  cloud:     { defaultModel: "qwen3.5-flash", maxTokens: 200,  enableThinking: false },
+  reviewer:  { defaultModel: "qwen-flash", maxTokens: 256,  enableThinking: false },
+  actor:     { defaultModel: "qwen-flash", maxTokens: 200,  enableThinking: false },
+  tts:       { defaultModel: "qwen-flash", maxTokens: 400,  enableThinking: false },
+  video:     { defaultModel: "qwen-flash", maxTokens: 400,  enableThinking: false },
+  telegram:  { defaultModel: "qwen-flash", maxTokens: 300,  enableThinking: false },
+  cloud:     { defaultModel: "qwen-flash", maxTokens: 200,  enableThinking: false },
 };

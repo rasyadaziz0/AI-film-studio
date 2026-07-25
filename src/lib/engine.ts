@@ -9,7 +9,7 @@ export async function executeNodeRequest(
   upstreamContext: string,
   provider: string = "qwen",
   model?: string,
-  options?: { maxTokens?: number; enableThinking?: boolean; targetLanguage?: string; videoDuration?: number }
+  options?: { maxTokens?: number; enableThinking?: boolean; targetLanguage?: string; videoDuration?: number; jobId?: string; studioId?: string }
 ): Promise<string> {
   // 1. Get per-node config defaults
   const config = NODE_MODEL_CONFIG[type];
@@ -40,5 +40,7 @@ export async function executeNodeRequest(
   return await aiProvider.generate(systemPrompt, userPrompt, finalModel, {
     maxTokens: finalMaxTokens,
     enableThinking: finalEnableThinking,
+    jobId: options?.jobId,
+    studioId: options?.studioId
   });
 }

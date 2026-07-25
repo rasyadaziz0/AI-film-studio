@@ -56,12 +56,33 @@ export class QwenProvider extends AIProvider {
 
     const data = await response.json();
 
-    // Log usage for monitoring (will be saved to ai_usage table in Step 8)
+    // Log usage for monitoring and auditing
     const usage = data.usage;
     if (usage) {
       console.log(
         `[Qwen] model=${finalModel} in=${usage.input_tokens ?? "?"} out=${usage.output_tokens ?? "?"} request_id=${data.request_id ?? "?"}`
       );
+
+      if (options?.studioId && options?.jobId) {
+        try {
+          const inputTokens = usage.input_tokens || 0;
+          const outputTokens = usage.output_tokens || 0;
+          const costUsd = ((inputTokens * 0.000001) + (outputTokens * 0.000002));
+          const { getServiceSupabase } = await import("../../auth/requireAuth");
+          const supabase = getServiceSupabase();
+          await supabase.from("ai_usage").insert({
+            studio_id: (options as any)?.studioId || null,
+            job_id: (options as any)?.jobId || null,
+            node_id: null,
+            model: finalModel,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            estimated_cost: costUsd
+          });
+        } catch (e) {
+          console.error("[QwenProvider] Failed to log usage:", e);
+        }
+      }
     }
 
     return data.choices[0].message.content;

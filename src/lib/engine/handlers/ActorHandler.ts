@@ -6,7 +6,7 @@ export class ActorHandler extends BaseNodeHandler {
   public async execute(context: ExecutionContext): Promise<string> {
     const { node, nodeId, finalUserInput, upstreamContext, nodeModel, supabase } = context;
 
-    const textResult = await executeNodeRequest(node.type as AgentType, finalUserInput, upstreamContext, "qwen", nodeModel, { targetLanguage: context.language });
+    const textResult = await executeNodeRequest(node.type as AgentType, finalUserInput, upstreamContext, "qwen", nodeModel, { targetLanguage: context.language, jobId: context.jobId, studioId: context.studioId });
     
     // Check if user already uploaded their own character image
     const userUploadedImage = node.config?.uploaded_image_url;
@@ -23,7 +23,7 @@ export class ActorHandler extends BaseNodeHandler {
       console.log(`[ServerEngine] Generating image for Actor ${nodeId} with qwen-image-plus... (media call #${callNum})`);
       
       const { DashScopeMedia } = await import("../../ai/providers/DashScopeMedia");
-      const imageUrl = await DashScopeMedia.generateImage(actorPrompt);
+      const imageUrl = await DashScopeMedia.generateImage(actorPrompt, { jobId: context.jobId, studioId: context.studioId });
       finalImageUrl = imageUrl;
       
       try {

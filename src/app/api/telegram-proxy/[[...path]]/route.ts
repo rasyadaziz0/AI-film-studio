@@ -13,7 +13,8 @@ export async function GET(req: NextRequest, context: { params: Promise<{ path?: 
 }
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
-  if (RELAY_SECRET && req.headers.get("x-relay-secret") !== RELAY_SECRET) {
+  // Fail-closed: secret MUST be configured, and MUST match
+  if (!RELAY_SECRET || req.headers.get("x-relay-secret") !== RELAY_SECRET) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -30,7 +31,13 @@ async function handleProxy(req: NextRequest, pathArray: string[]) {
     };
 
     if (req.method !== "GET" && req.method !== "HEAD") {
-      requestInit.body = await req.text();
+      const contentType = req.headers.get("Content-Type") || "";
+      if (contentType.includes("multipart/form-data")) {
+        requestInit.body = await req.formData();
+        delete (requestInit.headers as any)["Content-Type"];
+      } else {
+        requestInit.body = await req.text();
+      }
     }
 
     const response = await fetch(url.toString(), requestInit);

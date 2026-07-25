@@ -19,9 +19,31 @@ export async function POST(request: Request) {
       );
     }
 
-    const { prompt } = await request.json();
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    const { prompt, studioId } = await request.json();
+    if (!prompt || !studioId) {
+      return NextResponse.json({ error: "Prompt and studioId are required" }, { status: 400 });
+    }
+
+    // 4. Atomic Budget Reservation (RPC)
+    // 0.05 USD per image
+    // 5.0 USD daily limit
+    const { getServiceSupabase } = await import("@/lib/auth/requireAuth");
+    const supabase = getServiceSupabase();
+    const { data: rpcResult, error: reserveErr } = await supabase.rpc("reserve_image_spend", {
+      p_user_id: user.id,
+      p_studio_id: studioId,
+      p_cost: 0.05,
+      p_daily_limit: 5.0
+    });
+
+    if (reserveErr) {
+      console.error("[generate-image] RPC Error:", reserveErr);
+      return NextResponse.json({ error: "Gagal memverifikasi limit harian" }, { status: 500 });
+    }
+    
+    const budgetStatus = rpcResult as any;
+    if (budgetStatus?.error) {
+      return NextResponse.json({ error: budgetStatus.error }, { status: budgetStatus.error === "daily_budget_exceeded" ? 429 : 403 });
     }
 
     const { DashScopeMedia } = await import("@/lib/ai/providers/DashScopeMedia");
