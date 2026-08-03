@@ -3,8 +3,6 @@ import { ipRateLimiter, enforceRateLimits } from "@/lib/rateLimit";
 
 const RELAY_SECRET = process.env.TELEGRAM_RELAY_SECRET;
 
-export const runtime = "edge";
-
 export async function POST(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   const { path } = await context.params;
   return handleProxy(req, path || []);
