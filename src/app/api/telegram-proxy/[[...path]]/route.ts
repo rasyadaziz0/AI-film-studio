@@ -32,7 +32,11 @@ async function handleProxy(req: NextRequest, pathArray: string[]) {
   try {
     // 2nd layer of defense: Rate limit authorized requests per IP
     const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
-    await enforceRateLimits([{ limiter: ipRateLimiter, key: ip, label: "Telegram Proxy" }]);
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      await enforceRateLimits([{ limiter: ipRateLimiter, key: ip, label: "Telegram Proxy" }]);
+    } else {
+      console.warn("Upstash Redis is not configured in this environment, bypassing rate limit");
+    }
 
     const telegramPath = pathArray ? pathArray.join("/") : "";
     const url = new URL(`https://api.telegram.org/${telegramPath}`);
