@@ -3,7 +3,7 @@ import { ipRateLimiter, enforceRateLimits } from "@/lib/rateLimit";
 
 
 
-export const runtime = "edge";
+
 
 export async function POST(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   const { path } = await context.params;
