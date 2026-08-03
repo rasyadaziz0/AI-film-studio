@@ -18,7 +18,10 @@ async function handleProxy(req: NextRequest, pathArray: string[]) {
 
   // Fail-closed: secret MUST be configured, and MUST match
   // Checking this FIRST avoids exhausting Upstash quota on unauthorized DDoS requests.
-  if (!RELAY_SECRET || req.headers.get("x-relay-secret") !== RELAY_SECRET) {
+  if (!RELAY_SECRET) {
+    return NextResponse.json({ error: "Configuration Missing" }, { status: 401 });
+  }
+  if (req.headers.get("x-relay-secret") !== RELAY_SECRET) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
