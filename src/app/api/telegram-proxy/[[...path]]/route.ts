@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ipRateLimiter, enforceRateLimits } from "@/lib/rateLimit";
 
 const RELAY_SECRET = process.env.TELEGRAM_RELAY_SECRET;
+
+export const runtime = "edge";
 
 export async function POST(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   const { path } = await context.params;
@@ -14,11 +17,16 @@ export async function GET(req: NextRequest, context: { params: Promise<{ path?: 
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
   // Fail-closed: secret MUST be configured, and MUST match
+  // Checking this FIRST avoids exhausting Upstash quota on unauthorized DDoS requests.
   if (!RELAY_SECRET || req.headers.get("x-relay-secret") !== RELAY_SECRET) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
+    // 2nd layer of defense: Rate limit authorized requests per IP
+    const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    await enforceRateLimits([{ limiter: ipRateLimiter, key: ip, label: "Telegram Proxy" }]);
+
     const telegramPath = pathArray ? pathArray.join("/") : "";
     const url = new URL(`https://api.telegram.org/${telegramPath}`);
     url.search = req.nextUrl.search;
