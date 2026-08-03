@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ipRateLimiter, enforceRateLimits } from "@/lib/rateLimit";
 
-const RELAY_SECRET = process.env.TELEGRAM_RELAY_SECRET;
+
 
 export async function POST(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   const { path } = await context.params;
@@ -14,6 +14,8 @@ export async function GET(req: NextRequest, context: { params: Promise<{ path?: 
 }
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
+  const RELAY_SECRET = process.env.TELEGRAM_RELAY_SECRET;
+
   // Fail-closed: secret MUST be configured, and MUST match
   // Checking this FIRST avoids exhausting Upstash quota on unauthorized DDoS requests.
   if (!RELAY_SECRET || req.headers.get("x-relay-secret") !== RELAY_SECRET) {
