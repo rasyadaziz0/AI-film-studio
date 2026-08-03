@@ -70,7 +70,7 @@ export class ActorPresenter extends BaseNodePresenter {
       if (!actorPrompt.trim()) return;
       this.store.updateNodeData(this.id, { status: "running" });
       try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
+        const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || 'https://api.acadlabs.fun';
         const { supabase } = await import("@/lib/supabase");
         const { data: { session } } = await supabase.auth.getSession();
         const res = await fetch(`${apiUrl}/v1/ai/generate-image`, {
@@ -102,7 +102,7 @@ export class ActorPresenter extends BaseNodePresenter {
       this.store.updateNodeData(this.id, { status: "running" });
       try {
         // Get presigned upload URL from ECS
-        const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
+        const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || 'https://api.acadlabs.fun';
         const { supabase } = await import("@/lib/supabase");
         const { data: { session } } = await supabase.auth.getSession();
         const studioId = this.store.activeStudioId || this.data.studio_id;

@@ -94,7 +94,7 @@ export const useStudioStore = create<StudioState>((set, get) => {
       const { supabase } = await import("@/lib/supabase");
       const { data: { session } } = await supabase.auth.getSession();
 
-      const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || 'https://api.acadlabs.fun';
       const idempotencyKey = crypto.randomUUID();
       const res = await fetch(`${apiUrl}/v1/jobs`, {
         method: "POST",
@@ -134,7 +134,7 @@ export const useStudioStore = create<StudioState>((set, get) => {
       const { data: { session } } = await supabase.auth.getSession();
 
       // Trigger server-side engine with idempotency key to prevent double-click
-      const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || '';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_BASE_URL === '/backend' ? 'https://api.acadlabs.fun' : process.env.NEXT_PUBLIC_API_BASE_URL) || 'https://api.acadlabs.fun';
       const idempotencyKey = crypto.randomUUID();
       const res = await fetch(`${apiUrl}/v1/jobs`, {
         method: "POST",
