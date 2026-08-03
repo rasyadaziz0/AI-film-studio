@@ -16,9 +16,9 @@ export async function GET(req: NextRequest, context: { params: Promise<{ path?: 
 }
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
-  // Fallback to Supabase Anon Key if TELEGRAM_RELAY_SECRET is missing.
-  // Since Cloudflare Pages deployments can be tricky with new env vars, this ensures it works out of the box.
-  const RELAY_SECRET = process.env.TELEGRAM_RELAY_SECRET || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Hardcoded shared secret — must match the value sent by ECS backend.
+  // This avoids env var mismatch issues between Cloudflare Pages and ECS.
+  const RELAY_SECRET = "afs-relay-2026-xK9mP";
 
   // Fail-closed: secret MUST be configured, and MUST match
   // Checking this FIRST avoids exhausting Upstash quota on unauthorized DDoS requests.
